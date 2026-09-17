@@ -1,0 +1,10 @@
+{
+  "name": "Smart Asset Tracker",
+  "description": "Asset tracking and management system with QR identification, check-in/out workflows, location hierarchy, and movement audit history.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
