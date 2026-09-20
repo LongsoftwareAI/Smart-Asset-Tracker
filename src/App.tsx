@@ -16,12 +16,19 @@ import { AssetFormModal } from './components/AssetFormModal';
 import { TransferProjectModal } from './components/TransferProjectModal';
 import { Asset, AssetCategory, DashboardStats, Location, Project, User, UserRole } from './types';
 import { api } from './services/api';
+import { useAuth } from './context/AuthContext';
+import { LoginScreen } from './components/LoginScreen';
 import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function App() {
+  const { user, isLoading: isAuthLoading } = useAuth();
   // Navigation & Role State
   const [activeTab, setActiveTab] = useState<'dashboard' | 'assets' | 'locations' | 'audit' | 'api'>('dashboard');
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
+
+  useEffect(() => {
+    if (user) setCurrentRole(user.role);
+  }, [user]);
 
   // Core Data
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -212,6 +219,12 @@ export default function App() {
     showToast(msg);
     fetchData();
   };
+
+  if (isAuthLoading) {
+    return <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-200">Đang kiểm tra phiên đăng nhập…</div>;
+  }
+
+  if (!user) return <LoginScreen />;
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900/50 dark:selection:text-blue-200 overflow-x-hidden w-full max-w-full transition-colors duration-200">
