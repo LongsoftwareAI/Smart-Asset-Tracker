@@ -11,6 +11,12 @@ const seedPasswords: Record<string, string> = {
   'USER-003': 'Worker@123456',
 };
 
+const seedEmails: Record<string, string> = {
+  'USER-005': 'admin@assetmate.vn',
+  'USER-004': 'kho.hanoi@assetmate.vn',
+  'USER-001': 'kythuat@assetmate.vn',
+};
+
 async function seed() {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Refusing to seed default credentials in production.');
@@ -23,7 +29,7 @@ async function seed() {
         `INSERT INTO users (user_id, name, email, password_hash, role, department, avatar_url)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          ON CONFLICT (user_id) DO NOTHING`,
-        [user.user_id, user.name, user.email, passwordHash, user.role, user.department, user.avatar || null]
+        [user.user_id, user.name, seedEmails[user.user_id] || user.email, passwordHash, user.role, user.department, user.avatar || null]
       );
     }
 
