@@ -14,7 +14,7 @@ import { QrCodeModal } from './components/QrCodeModal';
 import { QrScannerModal } from './components/QrScannerModal';
 import { AssetFormModal } from './components/AssetFormModal';
 import { TransferProjectModal } from './components/TransferProjectModal';
-import { Asset, AssetCategory, DashboardStats, Location, Project, User, UserRole } from './types';
+import { Asset, AssetCategory, DashboardStats, Location, Project, User } from './types';
 import { api } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { LoginScreen } from './components/LoginScreen';
@@ -24,11 +24,7 @@ export default function App() {
   const { user, isLoading: isAuthLoading, logout } = useAuth();
   // Navigation & Role State
   const [activeTab, setActiveTab] = useState<'dashboard' | 'assets' | 'locations' | 'audit' | 'api'>('dashboard');
-  const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
-
-  useEffect(() => {
-    if (user) setCurrentRole(user.role);
-  }, [user]);
+  const currentRole = user?.role ?? 'STAFF';
 
   // Core Data
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -232,8 +228,8 @@ export default function App() {
       <Header
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        currentRole={currentRole}
-        onRoleChange={setCurrentRole}
+        currentRole={user.role}
+        accountName={user.name}
         onOpenScanner={() => setIsScannerOpen(true)}
         onOpenCreateAsset={handleOpenCreateAsset}
         onResetData={handleResetData}

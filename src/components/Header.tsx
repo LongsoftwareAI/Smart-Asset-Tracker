@@ -24,7 +24,7 @@ import { useTheme } from '../context/ThemeContext';
 
 interface HeaderProps {
   currentRole: UserRole;
-  onRoleChange: (role: UserRole) => void;
+  accountName: string;
   activeTab: 'dashboard' | 'assets' | 'locations' | 'audit' | 'api';
   onTabChange: (tab: 'dashboard' | 'assets' | 'locations' | 'audit' | 'api') => void;
   onOpenScanner: () => void;
@@ -35,7 +35,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   currentRole,
-  onRoleChange,
+  accountName,
   activeTab,
   onTabChange,
   onOpenScanner,
@@ -89,6 +89,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Actions & Role Switcher */}
           <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+            <div className="hidden md:block text-right leading-tight">
+              <p className="max-w-32 truncate text-xs font-semibold text-slate-100">{accountName}</p>
+              <p className="text-[10px] text-slate-400">{currentRole}</p>
+            </div>
             {/* Desktop Scan QR Button */}
             <button
               id="btn-open-scanner"
@@ -164,8 +168,9 @@ export const Header: React.FC<HeaderProps> = ({
               <select
                 id="mobile-role-select"
                 value={currentRole}
-                onChange={(e) => onRoleChange(e.target.value as UserRole)}
-                className={`text-[11px] font-bold py-1.5 pl-2 pr-5 rounded-lg border appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 ${
+                disabled
+                aria-label={`Vai trò hiện tại: ${currentRole}`}
+                className={`text-[11px] font-bold py-1.5 pl-2 pr-5 rounded-lg border appearance-none cursor-not-allowed opacity-90 ${
                   currentRole === 'ADMIN'
                     ? 'bg-purple-950/90 text-purple-200 border-purple-700'
                     : currentRole === 'STAFF'
@@ -187,7 +192,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
               <button
                 id="role-btn-admin"
-                onClick={() => onRoleChange('ADMIN')}
+                disabled
                 title="Quyền Quản trị viên"
                 className={`px-1.5 sm:px-2 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                   currentRole === 'ADMIN'
@@ -200,7 +205,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 id="role-btn-staff"
-                onClick={() => onRoleChange('STAFF')}
+                disabled
                 title="Quyền Nhân viên kỹ thuật"
                 className={`px-1.5 sm:px-2 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                   currentRole === 'STAFF'
@@ -213,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 id="role-btn-manager"
-                onClick={() => onRoleChange('MANAGER')}
+                disabled
                 title="Quyền Trưởng phòng / Quản lý"
                 className={`px-1.5 sm:px-2 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                   currentRole === 'MANAGER'
@@ -225,6 +230,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden md:inline">Manager</span>
               </button>
             </div>
+
+            <button
+              id="btn-logout-mobile"
+              onClick={onLogout}
+              title="Đăng xuất"
+              aria-label="Đăng xuất"
+              className="sm:hidden p-1.5 text-slate-300 hover:text-red-300 hover:bg-slate-800 rounded-lg transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
 
             {/* MOBILE MORE MENU (⋮): Tùy chọn & Tiện ích hệ thống */}
             <div className="sm:hidden">
