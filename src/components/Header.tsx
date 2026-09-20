@@ -17,6 +17,7 @@ import {
   FileText,
   Moon,
   Sun,
+  LogOut,
 } from 'lucide-react';
 import { UserRole } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -29,6 +30,7 @@ interface HeaderProps {
   onOpenScanner: () => void;
   onOpenCreateAsset: () => void;
   onResetData: () => void;
+  onLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -39,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenScanner,
   onOpenCreateAsset,
   onResetData,
+  onLogout,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -145,6 +148,15 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <Code2 className="w-4 h-4" />
+            </button>
+
+            <button
+              id="btn-logout"
+              onClick={onLogout}
+              title="Đăng xuất"
+              className="hidden sm:flex p-1.5 text-slate-400 hover:text-red-300 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] items-center justify-center"
+            >
+              <LogOut className="w-4 h-4" />
             </button>
 
             {/* MOBILE ROLE SELECTOR: Compact, clean, never overflows */}

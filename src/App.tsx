@@ -21,7 +21,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function App() {
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, logout } = useAuth();
   // Navigation & Role State
   const [activeTab, setActiveTab] = useState<'dashboard' | 'assets' | 'locations' | 'audit' | 'api'>('dashboard');
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
@@ -237,6 +237,7 @@ export default function App() {
         onOpenScanner={() => setIsScannerOpen(true)}
         onOpenCreateAsset={handleOpenCreateAsset}
         onResetData={handleResetData}
+        onLogout={() => void logout()}
       />
 
       {/* Main App Container with mobile bottom nav padding */}
