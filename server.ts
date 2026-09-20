@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { authRouter } from './server/routes/auth';
 import {
   INITIAL_ASSETS,
   INITIAL_AUDIT_LOGS,
@@ -68,7 +69,8 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '100kb' }));
+  app.use('/api/auth', authRouter);
 
   // Health check
   app.get('/api/health', (_req, res) => {
@@ -757,6 +759,13 @@ async function startServer() {
 
     res.json(stats);
   });
+
+  app.use(((error: unknown, _req, res, _next) => {
+    console.error('Unhandled request failed.', error instanceof Error ? error.name : 'Unknown error');
+    res.status(500).json({
+      error: { code: 'INTERNAL_ERROR', message: 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại.' },
+    });
+  }) as express.ErrorRequestHandler);
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
