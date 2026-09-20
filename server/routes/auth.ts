@@ -7,6 +7,8 @@ import {
   normalizeEmail,
   signAccessToken,
   validatePassword,
+  validateRegistration,
+  createUserId,
 } from '../auth.js';
 import { getPool, withTransaction } from '../db.js';
 import { authenticate, type AuthenticatedRequest } from '../middleware/auth.js';
@@ -147,6 +149,34 @@ authRouter.post('/login', authRateLimit, asyncRoute(async (req, res) => {
     accessToken: signAccessToken({ userId: user.user_id, email: user.email, role: user.role }),
     user: publicUser(user),
   });
+}));
+
+authRouter.post('/register', authRateLimit, asyncRoute(async (req, res) => {
+  const { name, email, password, department } = req.body ?? {};
+  const validationError = validateRegistration({ name, email, password, department });
+  if (validationError) return sendError(res, 422, 'VALIDATION_ERROR', validationError);
+
+  const normalizedEmail = normalizeEmail(email);
+  const userId = createUserId();
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  try {
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO users (user_id, name, email, password_hash, role, department)
+         VALUES ($1, $2, $3, $4, 'STAFF', $5)`,
+        [userId, name.trim(), normalizedEmail, passwordHash, department?.trim() || '']
+      );
+      await audit(client, userId, 'ACCOUNT_REGISTERED');
+    });
+  } catch (error) {
+    if ((error as { code?: string }).code === '23505') {
+      return sendError(res, 409, 'EMAIL_IN_USE', 'Email này đã được sử dụng.');
+    }
+    throw error;
+  }
+
+  return res.status(201).json({ message: 'Tạo tài khoản thành công. Vui lòng đăng nhập.' });
 }));
 
 authRouter.post('/refresh', authRateLimit, asyncRoute(async (req, res) => {

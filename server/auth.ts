@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 
 export type AuthRole = 'ADMIN' | 'MANAGER' | 'STAFF';
@@ -21,6 +21,41 @@ export function validatePassword(password: string): string | null {
   }
 
   return null;
+}
+
+interface RegistrationInput {
+  name: unknown;
+  email: unknown;
+  password: unknown;
+  department?: unknown;
+}
+
+export function validateRegistration(input: RegistrationInput): string | null {
+  if (typeof input.name !== 'string' || input.name.trim().length < 2 || input.name.trim().length > 100) {
+    return 'Họ tên phải có từ 2 đến 100 ký tự.';
+  }
+
+  if (
+    typeof input.email !== 'string' ||
+    input.email.trim().length > 255 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())
+  ) {
+    return 'Email không hợp lệ.';
+  }
+
+  if (typeof input.password !== 'string') return 'Mật khẩu là bắt buộc.';
+  const passwordError = validatePassword(input.password);
+  if (passwordError) return passwordError;
+
+  if (input.department !== undefined && (typeof input.department !== 'string' || input.department.trim().length > 100)) {
+    return 'Phòng ban không hợp lệ.';
+  }
+
+  return null;
+}
+
+export function createUserId(): string {
+  return `USER-${randomUUID()}`;
 }
 
 export function createOpaqueToken(): string {
