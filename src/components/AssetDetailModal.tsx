@@ -16,6 +16,7 @@ import {
   Calendar,
   Building2,
 } from 'lucide-react';
+import * as MESSAGES from '../../shared/messages';
 import { Asset, AssetCategory, AssetStatus, AssetTransaction, Location, Project, User, UserRole } from '../types';
 import { api } from '../services/api';
 import {
@@ -92,13 +93,13 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
       await api.updateAssetStatus(
         asset.asset_id,
         selectedNewStatus,
-        statusNote || `Chuyển trạng thái sang ${selectedNewStatus}`,
+        statusNote || MESSAGES.STATUS_AUDIT_NOTE(selectedNewStatus),
         'USER-005'
       );
       setShowStatusPicker(false);
       onStatusChanged();
     } catch (err: any) {
-      setStatusError(err.message || 'Lỗi cập nhật trạng thái');
+      setStatusError(err.message || MESSAGES.STATUS_UPDATE_FAILED);
     } finally {
       setStatusUpdating(false);
     }
@@ -121,7 +122,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -158,7 +159,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                     }}
                     className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium cursor-pointer"
                   >
-                    Đổi trạng thái
+                    {MESSAGES.STATUS_CHANGE}
                   </button>
                 )}
               </div>
@@ -176,7 +177,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                 </div>
               ) : (
                 <span className="text-xs text-slate-400 dark:text-slate-500 italic font-medium">
-                  Không có (Sẵn sàng hoặc trong kho)
+                  {MESSAGES.NO_STATUS}
                 </span>
               )}
             </div>
@@ -184,28 +185,28 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
             {/* Location */}
             <div>
               <span className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block mb-1">
-                Location (Vị trí ghi nhận)
+                {MESSAGES.LOCATION_INFO}
               </span>
               <div className="flex items-center space-x-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
                 <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
                 <span>{locName}</span>
               </div>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">
-                (Last known location từ giao dịch gần nhất)
+                {MESSAGES.LAST_KNOWN_LOCATION}
               </span>
             </div>
 
             {/* Project / Construction Site */}
             <div>
               <span className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block mb-1">
-                Công trường / Dự án
+                {MESSAGES.PROJECT_SITE_LABEL}
               </span>
               <div className="flex items-center space-x-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
                 <Building2 className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span className="truncate">{proj ? `[${proj.project_code}] ${proj.project_name}` : 'Kho Trung Tâm'}</span>
+                <span className="truncate">{proj ? `[${proj.project_code}] ${proj.project_name}` : MESSAGES.CENTRAL_WAREHOUSE}</span>
               </div>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">
-                {proj?.address || 'Quản lý tập trung'}
+                {proj?.address || MESSAGES.CENTRAL_MANAGEMENT}
               </span>
             </div>
 
@@ -230,7 +231,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
           {showStatusPicker && (
             <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-xl space-y-3">
               <h4 className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider">
-                Cập nhật trạng thái thủ công (Admin override)
+              {MESSAGES.MANUAL_STATUS_UPDATE}
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {Object.values(AssetStatus).map((st) => (
@@ -249,7 +250,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
               </div>
               <input
                 type="text"
-                placeholder="Ghi chú lý do thay đổi trạng thái..."
+                placeholder={MESSAGES.STATUS_REASON_LABEL}
                 value={statusNote}
                 onChange={(e) => setStatusNote(e.target.value)}
                 className="w-full text-xs p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
@@ -259,14 +260,14 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                   onClick={() => setShowStatusPicker(false)}
                   className="px-3 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-md transition-colors"
                 >
-                  Hủy
+                  {MESSAGES.CANCEL}
                 </button>
                 <button
                   onClick={handleUpdateStatus}
                   disabled={statusUpdating}
                   className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-md transition-colors"
                 >
-                  {statusUpdating ? 'Đang lưu...' : 'Lưu trạng thái'}
+                  {statusUpdating ? MESSAGES.SAVING : MESSAGES.SAVE_STATUS}
                 </button>
               </div>
             </div>
@@ -275,21 +276,21 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
           {/* Description & Technical Specs */}
           <div className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-500 dark:text-slate-400">Thông tin chi tiết:</span>
+              <span className="font-semibold text-slate-500 dark:text-slate-400">{MESSAGES.DETAILS}</span>
               <span className="font-mono text-slate-500 dark:text-slate-400">Mã QR: {asset.qr_code}</span>
             </div>
             <p className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
-              {asset.description || 'Không có mô tả bổ sung.'}
+              {asset.description || MESSAGES.NO_DESCRIPTION}
             </p>
             <div className="flex flex-wrap gap-4 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
               <span>
-                <strong>Số Serial:</strong> {asset.serial_number || 'N/A'}
+                <strong>{MESSAGES.SERIAL_NUMBER}</strong> {asset.serial_number || MESSAGES.UNKNOWN_VALUE}
               </span>
               <span>
-                <strong>Mã RFID (Phase 2):</strong> {asset.rfid_code || 'Chưa gắn'}
+                <strong>{MESSAGES.RFID_CODE}</strong> {asset.rfid_code || MESSAGES.NOT_ATTACHED}
               </span>
               <span>
-                <strong>Ngày tạo:</strong> {formatDateTime(asset.created_at)}
+                <strong>{MESSAGES.CREATED_AT}</strong> {formatDateTime(asset.created_at)}
               </span>
             </div>
           </div>
@@ -306,7 +307,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                 className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer flex items-center justify-center space-x-1.5 min-h-[44px]"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Check-out (Mượn tài sản)</span>
+                <span>{MESSAGES.CHECKOUT_TITLE}</span>
               </button>
             )}
 
@@ -320,7 +321,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                 className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer flex items-center justify-center space-x-1.5 min-h-[44px]"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Check-in (Trả tài sản)</span>
+                <span>{MESSAGES.CHECKIN_ASSET_ACTION}</span>
               </button>
             )}
 
@@ -333,7 +334,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
               className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 min-h-[44px]"
             >
               <ArrowRightLeft className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-              <span>Cập nhật vị trí (Move)</span>
+              <span>{MESSAGES.MOVE_TITLE}</span>
             </button>
 
             {onTransferProject && (
@@ -346,7 +347,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                 className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 min-h-[44px]"
               >
                 <Building2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Chuyển công trường</span>
+                <span>{MESSAGES.TRANSFER_TITLE}</span>
               </button>
             )}
 
@@ -369,7 +370,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
                 className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 sm:ml-auto min-h-[44px]"
               >
                 <Edit2 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                <span>Chỉnh sửa</span>
+                <span>{MESSAGES.UPDATE_ASSET_ACTION}</span>
               </button>
             )}
           </div>
@@ -379,29 +380,29 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <History className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Asset Movement History (Lịch sử dịch chuyển)</span>
+                <span>{MESSAGES.MOVEMENT_HISTORY}</span>
               </h3>
               <span className="text-xs text-slate-400 dark:text-slate-500">
-                {history.length} sự kiện đã lưu
+                {MESSAGES.HISTORY_COUNT(history.length)}
               </span>
             </div>
 
             {loadingHistory ? (
-              <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">Đang tải lịch sử...</div>
+              <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">{MESSAGES.LOADING_HISTORY}</div>
             ) : history.length === 0 ? (
               <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
-                Chưa có lịch sử giao dịch nào được ghi nhận cho tài sản này.
+                {MESSAGES.NO_HISTORY}
               </div>
             ) : (
               <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
                 <table className="w-full text-left text-xs min-w-[460px]">
                   <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[11px] uppercase">
                     <tr>
-                      <th className="py-2.5 px-3">Thời gian</th>
-                      <th className="py-2.5 px-3">Sự kiện</th>
-                      <th className="py-2.5 px-3">Người thực hiện</th>
-                      <th className="py-2.5 px-3">Vị trí ghi nhận</th>
-                      <th className="py-2.5 px-3">Ghi chú</th>
+                      <th className="py-2.5 px-3">{MESSAGES.TIME}</th>
+                      <th className="py-2.5 px-3">{MESSAGES.EVENT}</th>
+                      <th className="py-2.5 px-3">{MESSAGES.PERFORMER}</th>
+                      <th className="py-2.5 px-3">{MESSAGES.RECORDED_LOCATION}</th>
+                      <th className="py-2.5 px-3">{MESSAGES.NOTE}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -452,7 +453,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
             onClick={onClose}
             className="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer min-h-[44px] flex items-center justify-center"
           >
-            Đóng cửa sổ
+            {MESSAGES.CLOSE_WINDOW}
           </button>
         </div>
       </div>

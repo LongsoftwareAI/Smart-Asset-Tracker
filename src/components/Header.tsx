@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { UserRole } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import * as MESSAGES from '../../shared/messages';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -100,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="hidden sm:inline-flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition-all cursor-pointer min-h-[38px]"
             >
               <QrCode className="w-4 h-4" />
-              <span>Quét QR</span>
+              <span>{MESSAGES.SCAN_QR}</span>
             </button>
 
             {/* Admin Add Asset (Both Mobile & Desktop) */}
@@ -109,10 +110,10 @@ export const Header: React.FC<HeaderProps> = ({
                 id="btn-create-asset-header"
                 onClick={onOpenCreateAsset}
                 className="inline-flex items-center space-x-1 px-2 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium rounded-lg border border-slate-700 transition-colors cursor-pointer min-h-[36px] sm:min-h-[38px]"
-                title="Tạo mới tài sản"
+                title={MESSAGES.CREATE_ASSET_TITLE_SHORT}
               >
                 <Plus className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="hidden sm:inline">Tạo mới</span>
+                <span className="hidden sm:inline">{MESSAGES.CREATE_ASSET}</span>
               </button>
             )}
 
@@ -120,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="btn-toggle-theme"
               onClick={toggleTheme}
-              title={theme === 'dark' ? 'Chuyển sang chế độ Sáng (Light mode)' : 'Chuyển sang chế độ Tối (Dark mode)'}
+              title={theme === 'dark' ? MESSAGES.LIGHT_MODE : MESSAGES.DARK_MODE}
               className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center border border-slate-700/60"
             >
               {theme === 'dark' ? (
@@ -134,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="btn-reset-data"
               onClick={onResetData}
-              title="Khôi phục dữ liệu mẫu ban đầu (DRILL-021, METER-015...)"
+              title={MESSAGES.RESET_DATA_TITLE}
               className="hidden sm:flex p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] items-center justify-center"
             >
               <RotateCcw className="w-4 h-4" />
@@ -144,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="btn-nav-api-quick"
               onClick={() => onTabChange('api')}
-              title="Tài liệu REST API & SRS Specs"
+              title={MESSAGES.API_DOCS_TITLE}
               className={`hidden sm:flex p-1.5 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] items-center justify-center ${
                 activeTab === 'api'
                   ? 'bg-slate-800 text-emerald-400 border border-slate-700'
@@ -157,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="btn-logout"
               onClick={onLogout}
-              title="Đăng xuất"
+              title={MESSAGES.LOGOUT}
               className="hidden sm:flex p-1.5 text-slate-400 hover:text-red-300 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] items-center justify-center"
             >
               <LogOut className="w-4 h-4" />
@@ -169,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
                 id="mobile-role-select"
                 value={currentRole}
                 disabled
-                aria-label={`Vai trò hiện tại: ${currentRole}`}
+                aria-label={MESSAGES.CURRENT_ROLE_ARIA(currentRole)}
                 className={`text-[11px] font-bold py-1.5 pl-2 pr-5 rounded-lg border appearance-none cursor-not-allowed opacity-90 ${
                   currentRole === 'ADMIN'
                     ? 'bg-purple-950/90 text-purple-200 border-purple-700'
@@ -193,7 +194,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="role-btn-admin"
                 disabled
-                title="Quyền Quản trị viên"
+                title={MESSAGES.ADMIN_PERMISSION}
                 className={`px-1.5 sm:px-2 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                   currentRole === 'ADMIN'
                     ? 'bg-purple-600 text-white shadow-sm'
@@ -206,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="role-btn-staff"
                 disabled
-                title="Quyền Nhân viên kỹ thuật"
+                title={MESSAGES.STAFF_PERMISSION}
                 className={`px-1.5 sm:px-2 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                   currentRole === 'STAFF'
                     ? 'bg-blue-600 text-white shadow-sm'
@@ -219,7 +220,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 id="role-btn-manager"
                 disabled
-                title="Quyền Trưởng phòng / Quản lý"
+                title={MESSAGES.MANAGER_PERMISSION}
                 className={`px-1.5 sm:px-2 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                   currentRole === 'MANAGER'
                     ? 'bg-amber-600 text-white shadow-sm'
@@ -234,8 +235,8 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="btn-logout-mobile"
               onClick={onLogout}
-              title="Đăng xuất"
-              aria-label="Đăng xuất"
+              title={MESSAGES.LOGOUT}
+              aria-label={MESSAGES.LOGOUT}
               className="sm:hidden p-1.5 text-slate-300 hover:text-red-300 hover:bg-slate-800 rounded-lg transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center"
             >
               <LogOut className="w-4 h-4" />
@@ -247,8 +248,8 @@ export const Header: React.FC<HeaderProps> = ({
                 id="btn-mobile-more"
                 onClick={() => setShowMobileMenu(true)}
                 className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 active:scale-95 rounded-lg transition-all cursor-pointer min-h-[38px] min-w-[36px] flex items-center justify-center border border-slate-700/60"
-                title="Tùy chọn & Tiện ích hệ thống"
-                aria-label="Tùy chọn & Tiện ích hệ thống"
+                title={MESSAGES.SYSTEM_OPTIONS}
+                aria-label={MESSAGES.SYSTEM_OPTIONS}
               >
                 <MoreVertical className="w-4 h-4 text-slate-300" />
               </button>
@@ -267,7 +268,7 @@ export const Header: React.FC<HeaderProps> = ({
                           <MoreVertical className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold text-white">Tùy chọn & Tiện ích</h3>
+                          <h3 className="text-sm font-bold text-white">{MESSAGES.SYSTEM_OPTIONS_TITLE}</h3>
                           <p className="text-[11px] text-slate-400">Smart Asset Tracker v1.0</p>
                         </div>
                       </div>
@@ -275,7 +276,7 @@ export const Header: React.FC<HeaderProps> = ({
                         type="button"
                         onClick={() => setShowMobileMenu(false)}
                         className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
-                        aria-label="Đóng menu"
+                        aria-label={MESSAGES.CLOSE_MENU}
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -297,13 +298,13 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-white flex items-center space-x-1.5">
-                            <span>Giao diện: {theme === 'dark' ? 'Chế độ Tối (Dark)' : 'Chế độ Sáng (Light)'}</span>
+                            <span>Giao diện: {theme === 'dark' ? MESSAGES.DARK_THEME : MESSAGES.LIGHT_THEME}</span>
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 font-semibold">
                               Theme
                             </span>
                           </div>
                           <div className="text-[11px] text-slate-400 mt-0.5">
-                            {theme === 'dark' ? 'Nhấn để chuyển sang chế độ Sáng' : 'Nhấn để chuyển sang chế độ Tối'}
+                            {theme === 'dark' ? MESSAGES.SWITCH_TO_LIGHT : MESSAGES.SWITCH_TO_DARK}
                           </div>
                         </div>
                       </button>
@@ -322,13 +323,13 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-white flex items-center space-x-1.5">
-                            <span>Tài liệu REST API & Đặc tả SRS</span>
+                            <span>{MESSAGES.API_DOCS_LABEL}</span>
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-semibold">
                               Specs
                             </span>
                           </div>
                           <div className="text-[11px] text-slate-400 mt-0.5">
-                            Tra cứu mã API endpoints, payload & tiêu chuẩn nghiệm thu
+                            {MESSAGES.API_DOCS_HELP}
                           </div>
                         </div>
                       </button>
@@ -347,23 +348,23 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-amber-300">
-                            Khôi phục dữ liệu mẫu ban đầu
+                            {MESSAGES.RESET_DATA_LABEL}
                           </div>
                           <div className="text-[11px] text-slate-400 mt-0.5">
-                            Đặt lại thiết bị, vị trí kho & lịch sử audit về mặc định
+                            {MESSAGES.RESET_DATA_HELP}
                           </div>
                         </div>
                       </button>
 
                       {/* Role Info Box */}
                       <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-                        <span>Vai trò hiện tại:</span>
+                        <span>{MESSAGES.CURRENT_ROLE_LABEL}</span>
                         <span className="font-bold text-white px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
                           {currentRole === 'ADMIN'
-                            ? '🛡️ Quản trị viên (Admin)'
+                            ? MESSAGES.ADMIN_ROLE
                             : currentRole === 'STAFF'
-                            ? '👷 Kỹ thuật / Công nhân (Staff)'
-                            : '👔 Trưởng ban / Quản lý (Manager)'}
+                            ? MESSAGES.STAFF_ROLE
+                            : MESSAGES.MANAGER_ROLE}
                         </span>
                       </div>
                     </div>
@@ -374,7 +375,7 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => setShowMobileMenu(false)}
                       className="w-full py-2.5 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 rounded-xl transition-colors cursor-pointer min-h-[40px]"
                     >
-                      Đóng
+                      {MESSAGES.CLOSE_MENU}
                     </button>
                   </div>
                 </div>
@@ -395,7 +396,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
-            <span>Dashboard & Báo cáo</span>
+            <span>{MESSAGES.DASHBOARD_NAV}</span>
           </button>
 
           <button
@@ -408,7 +409,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Boxes className="w-4 h-4" />
-            <span>Danh mục Tài sản & Tìm kiếm</span>
+            <span>{MESSAGES.ASSETS_NAV}</span>
           </button>
 
           <button
@@ -421,7 +422,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <MapPin className="w-4 h-4" />
-            <span>Khu vực (Locations)</span>
+            <span>{MESSAGES.LOCATIONS_NAV}</span>
           </button>
 
           <button
@@ -434,7 +435,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <History className="w-4 h-4" />
-            <span>Lịch sử & Audit Log</span>
+            <span>{MESSAGES.AUDIT_NAV}</span>
           </button>
 
           <button
@@ -447,7 +448,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Code2 className="w-4 h-4 text-emerald-400" />
-            <span>REST API & SRS Spec</span>
+            <span>{MESSAGES.API_NAV}</span>
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { X, Plus, Save, Sparkles, Building2 } from 'lucide-react';
 import { Asset, AssetCategory, AssetStatus, Location, Project } from '../types';
 import { api, CreateAssetPayload } from '../services/api';
+import * as MESSAGES from '../../shared/messages';
 
 interface AssetFormModalProps {
   assetToEdit: Asset | null;
@@ -72,11 +73,11 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assetName.trim()) {
-      setErrorMsg('Tên tài sản không được để trống');
+      setErrorMsg(MESSAGES.ASSET_NAME_REQUIRED);
       return;
     }
     if (!categoryId) {
-      setErrorMsg('Vui lòng chọn danh mục tài sản');
+      setErrorMsg(MESSAGES.CATEGORY_REQUIRED);
       return;
     }
 
@@ -110,7 +111,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Lưu tài sản thất bại');
+      setErrorMsg(err.message || MESSAGES.SAVE_FAILED);
     } finally {
       setLoading(false);
     }
@@ -127,15 +128,15 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-bold text-white">
-                {isEditing ? `Chỉnh sửa ${assetToEdit.asset_id}` : 'Thêm mới Tài sản (Register Asset)'}
+                {isEditing ? MESSAGES.EDIT_ASSET_TITLE(assetToEdit.asset_id) : MESSAGES.CREATE_ASSET_TITLE}
               </h3>
-              <p className="text-[11px] text-slate-400">SRS Mục 5 & AC-001 (Admin only)</p>
+              <p className="text-[11px] text-slate-400">{MESSAGES.ADMIN_ONLY_HELP}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -156,7 +157,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Asset ID (Mã định danh duy nhất) *
+                {MESSAGES.ASSET_ID_LABEL}
               </label>
               {!isEditing && (
                 <button
@@ -165,7 +166,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
                   className="text-[11px] text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center space-x-1 cursor-pointer"
                 >
                   <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>Tự động tạo mã</span>
+                  <span>{MESSAGES.AUTO_GENERATE_CODE}</span>
                 </button>
               )}
             </div>
@@ -174,27 +175,27 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
               type="text"
               value={assetId}
               onChange={(e) => setAssetId(e.target.value)}
-              placeholder="Ví dụ: DRILL-022, METER-018..."
+              placeholder={MESSAGES.ASSET_ID_PLACEHOLDER}
               disabled={isEditing}
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono disabled:opacity-50"
               required={!isEditing}
             />
             <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-              Hệ thống sẽ tự động liên kết mã QR tương ứng: <code>SMART-ASSET:{assetId || '[ID]'}</code>
+              {MESSAGES.QR_LINK_HELP} <code>SMART-ASSET:{assetId || '[ID]'}</code>
             </p>
           </div>
 
           {/* Asset Name */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Tên tài sản / Thiết bị (Asset Name) *
+              {MESSAGES.ASSET_NAME_LABEL}
             </label>
             <input
               id="asset-name-input"
               type="text"
               value={assetName}
               onChange={(e) => setAssetName(e.target.value)}
-              placeholder="Ví dụ: Máy khoan bê tông Bosch..."
+              placeholder={MESSAGES.ASSET_NAME_PLACEHOLDER}
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -204,7 +205,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Nhóm tài sản (Category) *
+                {MESSAGES.CATEGORY_LABEL}
               </label>
               <select
                 id="asset-category-select"
@@ -224,8 +225,8 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
             {/* Project / Worksite Assignment */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
-                <span>Dự án / Công trường</span>
-                <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">Phân bổ</span>
+                <span>{MESSAGES.PROJECT_LABEL}</span>
+                <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">{MESSAGES.ALLOCATION_LABEL}</span>
               </label>
               <select
                 id="asset-project-select"
@@ -246,7 +247,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
           {!isEditing && (
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Vị trí ban đầu (Initial Location theo dự án)
+                {MESSAGES.INITIAL_LOCATION_LABEL}
               </label>
               <select
                 id="asset-location-select"
@@ -255,7 +256,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
                 className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {projectLocations.length === 0 ? (
-                  <option value="LOC-WAREHOUSE">Kho tổng mặc định</option>
+                  <option value="LOC-WAREHOUSE">{MESSAGES.DEFAULT_WAREHOUSE}</option>
                 ) : (
                   projectLocations.map((loc) => (
                     <option key={loc.location_id} value={loc.location_id}>
@@ -271,26 +272,26 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Serial Number (Nhà sản xuất)
+                {MESSAGES.SERIAL_NUMBER_LABEL}
               </label>
               <input
                 type="text"
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value)}
-                placeholder="BSH-123456..."
+                placeholder={MESSAGES.SERIAL_PLACEHOLDER}
                 className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Mã RFID (Phase 2 tracking)
+                {MESSAGES.RFID_LABEL}
               </label>
               <input
                 type="text"
                 value={rfidCode}
                 onChange={(e) => setRfidCode(e.target.value)}
-                placeholder="RFID-99022..."
+                placeholder={MESSAGES.RFID_PLACEHOLDER}
                 className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
               />
             </div>
@@ -298,12 +299,12 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Mô tả chi tiết</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{MESSAGES.DESCRIPTION_LABEL}</label>
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Thông số kỹ thuật, tình trạng bàn giao, lưu ý an toàn..."
+              placeholder={MESSAGES.DESCRIPTION_PLACEHOLDER}
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -316,7 +317,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer min-h-[44px]"
           >
-            Hủy
+            {MESSAGES.CANCEL}
           </button>
           <button
             id="btn-save-asset"
@@ -325,7 +326,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
             className="px-5 py-2 bg-blue-600 hover:bg-blue-500 active:scale-95 disabled:bg-blue-300 dark:disabled:bg-blue-800 text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center space-x-1.5 min-h-[44px]"
           >
             <Save className="w-4 h-4" />
-            <span>{loading ? 'Đang lưu...' : isEditing ? 'Cập nhật tài sản' : 'Tạo tài sản'}</span>
+              <span>{loading ? MESSAGES.SAVING : isEditing ? MESSAGES.UPDATE_ASSET_ACTION : MESSAGES.CREATE_ASSET_ACTION}</span>
           </button>
         </div>
       </form>

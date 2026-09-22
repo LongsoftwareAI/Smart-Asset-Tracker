@@ -19,6 +19,7 @@ import { api } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { LoginScreen } from './components/LoginScreen';
 import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import * as MESSAGES from '../shared/messages';
 
 export default function App() {
   const { user, isLoading: isAuthLoading, logout } = useAuth();
@@ -84,7 +85,7 @@ export default function App() {
       setStats(statsData);
     } catch (err) {
       console.error('Failed to load application data:', err);
-      showToast('Lỗi khi tải dữ liệu từ máy chủ', 'error');
+      showToast(MESSAGES.SERVER_DATA_LOAD_FAILED, 'error');
     } finally {
       setLoading(false);
     }
@@ -156,7 +157,7 @@ export default function App() {
       api
         .getAsset(assetId)
         .then((data) => setDetailAsset(data))
-        .catch(() => showToast(`Không tìm thấy thông tin tài sản ${assetId}`, 'error'));
+        .catch(() => showToast(MESSAGES.ASSET_LOOKUP_FAILED(assetId), 'error'));
     }
   };
 
@@ -189,10 +190,10 @@ export default function App() {
     try {
       await api.resetData();
       await fetchData();
-      showToast('Đã khôi phục dữ liệu mẫu ban đầu thành công (DRILL-021, METER-015...)');
+      showToast(MESSAGES.RESET_DATA_TOAST);
     } catch (err) {
       console.error('Failed to reset data:', err);
-      showToast('Lỗi khi khôi phục dữ liệu mẫu', 'error');
+      showToast(MESSAGES.RESET_DATA_FAILED, 'error');
     }
   };
 
@@ -208,7 +209,7 @@ export default function App() {
 
   const handleScanFound = (asset: Asset) => {
     // Show toast confirmation while keeping scanner action sheet active
-    showToast(`Đã nhận diện thành công: ${asset.asset_id} — ${asset.asset_name}`);
+    showToast(MESSAGES.QR_RECOGNIZED(asset.asset_id, asset.asset_name));
   };
 
   const handleSuccessAction = (msg: string) => {
@@ -217,7 +218,7 @@ export default function App() {
   };
 
   if (isAuthLoading) {
-    return <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-200">Đang kiểm tra phiên đăng nhập…</div>;
+    return <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-200">{MESSAGES.SESSION_CHECKING}</div>;
   }
 
   if (!user) return <LoginScreen />;
@@ -242,7 +243,7 @@ export default function App() {
           <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-3">
             <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
             <p className="text-sm font-medium text-slate-600">
-              Đang tải dữ liệu Smart Asset Tracker...
+              {MESSAGES.APP_LOADING}
             </p>
           </div>
         ) : (
@@ -398,7 +399,7 @@ export default function App() {
         <CheckoutModal
           asset={checkoutAsset}
           onClose={() => setCheckoutAsset(null)}
-          onSuccess={() => handleSuccessAction(`Check-out thành công cho ${checkoutAsset.asset_id}`)}
+          onSuccess={() => handleSuccessAction(MESSAGES.CHECKOUT_TOAST(checkoutAsset.asset_id))}
           users={users}
           locations={locations}
           categories={categories}
@@ -410,7 +411,7 @@ export default function App() {
         <CheckinModal
           asset={checkinAsset}
           onClose={() => setCheckinAsset(null)}
-          onSuccess={() => handleSuccessAction(`Check-in hoàn trả thành công cho ${checkinAsset.asset_id}`)}
+          onSuccess={() => handleSuccessAction(MESSAGES.CHECKIN_TOAST(checkinAsset.asset_id))}
           users={users}
           locations={locations}
         />
@@ -421,7 +422,7 @@ export default function App() {
         <MoveModal
           asset={moveAsset}
           onClose={() => setMoveAsset(null)}
-          onSuccess={() => handleSuccessAction(`Cập nhật vị trí mới thành công cho ${moveAsset.asset_id}`)}
+          onSuccess={() => handleSuccessAction(MESSAGES.MOVE_TOAST(moveAsset.asset_id))}
           locations={locations}
           users={users}
         />
@@ -468,7 +469,7 @@ export default function App() {
         <AssetFormModal
           assetToEdit={assetToEdit}
           onClose={() => setIsFormOpen(false)}
-          onSuccess={() => handleSuccessAction(assetToEdit ? 'Cập nhật tài sản thành công' : 'Đăng ký tài sản mới thành công')}
+          onSuccess={() => handleSuccessAction(assetToEdit ? MESSAGES.ASSET_UPDATED : MESSAGES.ASSET_CREATED)}
           categories={categories}
           locations={locations}
           projects={projects}
@@ -480,7 +481,7 @@ export default function App() {
         <TransferProjectModal
           asset={transferAsset}
           onClose={() => setTransferAsset(null)}
-          onSuccess={() => handleSuccessAction(`Điều chuyển thành công thiết bị ${transferAsset.asset_id} sang công trường mới`)}
+          onSuccess={() => handleSuccessAction(MESSAGES.TRANSFER_TOAST(transferAsset.asset_id))}
           projects={projects}
           locations={locations}
           users={users}

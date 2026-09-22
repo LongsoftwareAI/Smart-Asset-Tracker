@@ -8,6 +8,7 @@ import {
   ScanLine,
 } from 'lucide-react';
 import { UserRole } from '../types';
+import * as MESSAGES from '../../shared/messages';
 
 interface BottomNavigationProps {
   activeTab: 'dashboard' | 'assets' | 'locations' | 'audit' | 'api';
@@ -24,7 +25,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   return (
     <nav
       id="mobile-bottom-nav"
-      aria-label="Mobile Navigation"
+      aria-label={MESSAGES.MOBILE_NAVIGATION}
       className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-2xl md:hidden px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 transition-colors duration-200"
     >
       <div className="flex items-center justify-around relative max-w-md mx-auto">
@@ -39,7 +40,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           }`}
         >
           <LayoutDashboard className={`w-5 h-5 ${activeTab === 'dashboard' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-          <span className="text-[10px] mt-1 tracking-tight leading-none">Tổng quan</span>
+          <span className="text-[10px] mt-1 tracking-tight leading-none">{MESSAGES.OVERVIEW_NAV}</span>
           {activeTab === 'dashboard' && (
             <span className="w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full mt-0.5" />
           )}
@@ -56,7 +57,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           }`}
         >
           <Boxes className={`w-5 h-5 ${activeTab === 'assets' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-          <span className="text-[10px] mt-1 tracking-tight leading-none">Tài sản</span>
+          <span className="text-[10px] mt-1 tracking-tight leading-none">{MESSAGES.ASSET_NAV}</span>
           {activeTab === 'assets' && (
             <span className="w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full mt-0.5" />
           )}
@@ -67,14 +68,14 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           <button
             id="mobile-nav-scan-qr"
             onClick={onOpenScanner}
-            aria-label="Quét mã QR tài sản"
+            aria-label={MESSAGES.QR_SCAN_ARIA}
             className="group relative flex flex-col items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/40 border-4 border-slate-100 dark:border-slate-800 active:scale-95 transition-all cursor-pointer hover:shadow-blue-500/60"
           >
             <div className="relative">
               <QrCode className="w-6 h-6 stroke-[2.2] animate-pulse" />
               <ScanLine className="w-3.5 h-3.5 text-amber-300 absolute -bottom-1 -right-1" />
             </div>
-            <span className="sr-only">Quét QR</span>
+            <span className="sr-only">{MESSAGES.QR_SCAN_SHORT}</span>
           </button>
         </div>
 
@@ -89,7 +90,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           }`}
         >
           <MapPin className={`w-5 h-5 ${activeTab === 'locations' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-          <span className="text-[10px] mt-1 tracking-tight leading-none">Vị trí</span>
+          <span className="text-[10px] mt-1 tracking-tight leading-none">{MESSAGES.LOCATIONS_NAV}</span>
           {activeTab === 'locations' && (
             <span className="w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full mt-0.5" />
           )}
@@ -106,7 +107,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           }`}
         >
           <History className={`w-5 h-5 ${activeTab === 'audit' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-          <span className="text-[10px] mt-1 tracking-tight leading-none">Nhật ký</span>
+          <span className="text-[10px] mt-1 tracking-tight leading-none">{MESSAGES.AUDIT_NAV}</span>
           {activeTab === 'audit' && (
             <span className="w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full mt-0.5" />
           )}

@@ -9,6 +9,11 @@ import {
   Project,
   User,
 } from '../types';
+import * as MESSAGES from '../../shared/messages';
+
+function getApiErrorMessage(body: { error?: string | { message?: string } }) {
+  return typeof body.error === 'string' ? body.error : body.error?.message;
+}
 
 export interface CheckoutPayload {
   user_id: string;
@@ -61,7 +66,7 @@ export const api = {
 
   async getProjects(): Promise<Project[]> {
     const res = await fetch('/api/projects');
-    if (!res.ok) throw new Error('Failed to fetch projects');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
@@ -80,7 +85,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to create project');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.API_REQUEST_FAILED);
     }
     return res.json();
   },
@@ -102,13 +107,13 @@ export const api = {
     if (filters?.search) params.append('search', filters.search);
 
     const res = await fetch(`/api/assets?${params.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch assets');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
   async searchAssets(query: string): Promise<Asset[]> {
     const res = await fetch(`/api/assets/search?q=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error('Failed to search assets');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
@@ -116,7 +121,7 @@ export const api = {
     const res = await fetch(`/api/assets/${encodeURIComponent(assetId)}`);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Asset not found');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.ASSET_NOT_FOUND());
     }
     return res.json();
   },
@@ -129,7 +134,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to create asset');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.SAVE_FAILED);
     }
     return res.json();
   },
@@ -142,7 +147,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to update asset');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.SAVE_FAILED);
     }
     return res.json();
   },
@@ -160,7 +165,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to update status');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.STATUS_UPDATE_FAILED);
     }
     return res.json();
   },
@@ -176,7 +181,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Check-out failed');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.CHECKOUT_FAILED);
     }
     return res.json();
   },
@@ -192,7 +197,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Check-in failed');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.CHECKIN_FAILED);
     }
     return res.json();
   },
@@ -208,7 +213,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Move asset failed');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.MOVE_FAILED);
     }
     return res.json();
   },
@@ -224,7 +229,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Transfer project failed');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.TRANSFER_FAILED);
     }
     return res.json();
   },
@@ -233,7 +238,7 @@ export const api = {
     assetId: string
   ): Promise<(AssetTransaction & { user_name: string; location_name: string })[]> {
     const res = await fetch(`/api/assets/${encodeURIComponent(assetId)}/history`);
-    if (!res.ok) throw new Error('Failed to fetch history');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
@@ -241,7 +246,7 @@ export const api = {
     const params = new URLSearchParams();
     if (projectId && projectId !== 'ALL') params.append('project_id', projectId);
     const res = await fetch(`/api/locations${params.toString() ? `?${params.toString()}` : ''}`);
-    if (!res.ok) throw new Error('Failed to fetch locations');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
@@ -259,27 +264,27 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to create location');
+      throw new Error(getApiErrorMessage(err) || MESSAGES.LOCATION_CREATE_FAILED);
     }
     return res.json();
   },
 
   async getCategories(): Promise<AssetCategory[]> {
     const res = await fetch('/api/categories');
-    if (!res.ok) throw new Error('Failed to fetch categories');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
   async getUsers(): Promise<User[]> {
     const res = await fetch('/api/users');
-    if (!res.ok) throw new Error('Failed to fetch users');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
   async getDashboardStats(projectId?: string): Promise<DashboardStats> {
     const query = projectId && projectId !== 'ALL' ? `?project=${encodeURIComponent(projectId)}` : '';
     const res = await fetch(`/api/dashboard/stats${query}`);
-    if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 
@@ -289,7 +294,7 @@ export const api = {
 
   async getAuditLogs(): Promise<AuditLog[]> {
     const res = await fetch('/api/audit-logs');
-    if (!res.ok) throw new Error('Failed to fetch audit logs');
+    if (!res.ok) throw new Error(MESSAGES.DATA_REQUEST_FAILED);
     return res.json();
   },
 };

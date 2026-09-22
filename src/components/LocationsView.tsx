@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { MapPin, Plus, FolderTree, Building, Layers, DoorOpen, Boxes, X, Briefcase, ChevronRight, Warehouse, ExternalLink, Filter } from 'lucide-react';
 import { Asset, Location, Project, User, UserRole } from '../types';
 import { api } from '../services/api';
+import * as MESSAGES from '../../shared/messages';
 
 interface LocationsViewProps {
   locations: Location[];
@@ -140,7 +141,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
       setDescription('');
       onRefresh();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Lỗi thêm vị trí');
+      setErrorMsg(err.message || MESSAGES.LOCATION_CREATE_FAILED);
     } finally {
       setLoading(false);
     }
@@ -159,7 +160,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projName.trim() || !projCode.trim()) {
-      setProjErrorMsg('Vui lòng nhập tên và mã dự án');
+      setProjErrorMsg(MESSAGES.PROJECT_NAME_CODE_REQUIRED);
       return;
     }
     setProjLoading(true);
@@ -180,7 +181,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
         handleSelectProjectTab(createdProj.project_id);
       }
     } catch (err: any) {
-      setProjErrorMsg(err.message || 'Lỗi khi tạo dự án mới');
+      setProjErrorMsg(err.message || MESSAGES.PROJECT_CREATE_FAILED);
     } finally {
       setProjLoading(false);
     }
@@ -225,7 +226,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
             <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-400 flex items-center justify-center shrink-0">
               <MapPin className="w-5 h-5" />
             </div>
-            <span>Quản lý Vị trí & Kho lưu trữ theo Dự án (SRS Mục 7)</span>
+            <span>{MESSAGES.LOCATIONS_TITLE}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
             Mỗi dự án / công trường sở hữu sơ đồ phân cấp riêng biệt gồm Site &rarr; Zone &rarr; Floor &rarr; Kho thiết bị (Warehouse) phục vụ định vị và bàn giao tài sản chuẩn xác.
@@ -237,17 +238,17 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
             <button
               onClick={() => handleOpenAddProjectModal()}
               className="flex-1 sm:flex-none px-3.5 py-2.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center space-x-1.5 shrink-0 min-h-[44px]"
-              title="Tạo dự án / công trường mới cho doanh nghiệp"
+              title={MESSAGES.CREATE_PROJECT_TITLE}
             >
               <Briefcase className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-              <span>+ Thêm Dự án mới</span>
+              <span>{MESSAGES.ADD_PROJECT}</span>
             </button>
             <button
               onClick={() => handleOpenAddModal()}
               className="flex-1 sm:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors cursor-pointer flex items-center justify-center space-x-2 shrink-0 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Thêm Khu vực / Kho</span>
+              <span>{MESSAGES.ADD_LOCATION}</span>
             </button>
           </div>
         )}
@@ -258,7 +259,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
             <Filter className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>Lọc xem theo Dự án / Công trường:</span>
+            <span>{MESSAGES.FILTER_PROJECTS}</span>
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Tổng cộng {projects.length} dự án &bull; {locations.length} vị trí / kho
@@ -339,7 +340,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          {project.address || 'Chưa cập nhật địa chỉ'} &bull; {project.description}
+                          {project.address || MESSAGES.ADDRESS_NOT_UPDATED} &bull; {project.description}
                         </p>
                       </div>
                     </div>
@@ -355,7 +356,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                           className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center space-x-1"
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span>Thêm KV vào dự án này</span>
+                          <span>{MESSAGES.ADD_LOCATION_TO_PROJECT}</span>
                         </button>
                       )}
                     </div>
@@ -365,8 +366,8 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   {projLocations.length === 0 ? (
                     <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                       <MapPin className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                      <p className="text-xs font-bold text-slate-600 dark:text-slate-300">Chưa có phân khu hoặc kho lưu trữ nào cho dự án này</p>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Bấm "Thêm KV vào dự án này" để tạo Site, Zone hoặc Kho lưu trữ thiết bị</p>
+                      <p className="text-xs font-bold text-slate-600 dark:text-slate-300">{MESSAGES.NO_PROJECT_LOCATIONS}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">{MESSAGES.ADD_LOCATION_HELP}</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -500,7 +501,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                       {/* Any orphan locations */}
                       {orphanLocs.length > 0 && (
                         <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl space-y-2">
-                          <span className="text-xs font-bold text-amber-800 dark:text-amber-300">Khu vực độc lập (Chưa gắn Site cha):</span>
+                          <span className="text-xs font-bold text-amber-800 dark:text-amber-300">{MESSAGES.INDEPENDENT_LOCATION}</span>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {orphanLocs.map((orph) => (
                               <div key={orph.location_id} className="p-2 bg-white dark:bg-slate-800 rounded-lg border border-amber-100 dark:border-amber-900/60 flex items-center justify-between">
@@ -533,12 +534,12 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
             <div className="bg-slate-900 dark:bg-slate-950 text-white px-5 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
               <div className="flex items-center space-x-2">
                 <Warehouse className="w-5 h-5 text-blue-400" />
-                <span className="text-sm font-bold">Thêm mới Khu vực / Kho lưu trữ Dự án</span>
+                <span className="text-sm font-bold">{MESSAGES.LOCATION_MODAL_TITLE}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                aria-label="Đóng"
+                aria-label={MESSAGES.CLOSE_MODAL}
                 className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
@@ -586,7 +587,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ví dụ: Kho tổng cơ điện, Zone Ga Bến Thành, Tầng 3..."
+                    placeholder={MESSAGES.LOCATION_NAME_PLACEHOLDER}
                     value={locName}
                     onChange={(e) => setLocName(e.target.value)}
                     className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
@@ -621,7 +622,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                       onChange={(e) => setParentId(e.target.value)}
                       className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">(Là gốc / Site cấp cao nhất)</option>
+                      <option value="">{MESSAGES.ROOT_LOCATION_OPTION}</option>
                       {modalEligibleParents.map((l) => (
                         <option key={l.location_id} value={l.location_id}>
                           [{l.location_type}] {l.location_name}
@@ -637,7 +638,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   </label>
                   <textarea
                     rows={2}
-                    placeholder="Mô tả phạm vi thi công, thủ kho quản lý hoặc chỉ dẫn định vị..."
+                    placeholder={MESSAGES.LOCATION_DESCRIPTION_PLACEHOLDER}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -658,7 +659,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   disabled={loading}
                   className="flex-1 sm:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer min-h-[44px] flex items-center justify-center"
                 >
-                  {loading ? 'Đang lưu...' : 'Thêm vị trí / Kho'}
+                  {loading ? MESSAGES.SAVING : MESSAGES.SAVE_LOCATION}
                 </button>
               </div>
             </form>
@@ -676,8 +677,8 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   <Briefcase className="w-4 h-4 text-slate-900" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold">Thêm Dự án / Công trường mới</h3>
-                  <p className="text-[11px] text-slate-400">Tự động khởi tạo Site gốc và Kho thiết bị tập trung</p>
+                  <h3 className="text-sm sm:text-base font-bold">{MESSAGES.NEW_PROJECT_MODAL_TITLE}</h3>
+                  <p className="text-[11px] text-slate-400">{MESSAGES.NEW_PROJECT_HELP}</p>
                 </div>
               </div>
               <button
@@ -703,7 +704,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ví dụ: Dự án Cầu Thủ Thiêm 4, Nhà máy Lego Bình Dương..."
+                      placeholder={MESSAGES.PROJECT_NAME_PLACEHOLDER}
                     value={projName}
                     onChange={(e) => setProjName(e.target.value)}
                     className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
@@ -719,7 +720,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                     </label>
                     <input
                       type="text"
-                      placeholder="Ví dụ: TT-04, LEGO-BD..."
+                      placeholder={MESSAGES.PROJECT_CODE_PLACEHOLDER}
                       value={projCode}
                       onChange={(e) => setProjCode(e.target.value.toUpperCase())}
                       className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono font-bold uppercase"
@@ -743,7 +744,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                           </option>
                         ))
                       ) : (
-                        <option value="USER-004">Phạm Văn Quản Lý (MANAGER)</option>
+                        <option value="USER-004">{MESSAGES.MANAGER_OPTION}</option>
                       )}
                     </select>
                   </div>
@@ -756,7 +757,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ví dụ: Quận 7 & TP. Thủ Đức, TP. Hồ Chí Minh"
+                      placeholder={MESSAGES.PROJECT_ADDRESS_PLACEHOLDER}
                     value={projAddress}
                     onChange={(e) => setProjAddress(e.target.value)}
                     className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -770,7 +771,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   </label>
                   <textarea
                     rows={2}
-                    placeholder="Quy mô dự án, thời gian dự kiến thi công, yêu cầu thiết bị..."
+                      placeholder={MESSAGES.PROJECT_DESCRIPTION_PLACEHOLDER}
                     value={projDescription}
                     onChange={(e) => setProjDescription(e.target.value)}
                     className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
@@ -780,7 +781,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                 <div className="p-3 bg-amber-50/80 dark:bg-amber-950/40 rounded-xl border border-amber-200/80 dark:border-amber-800/80 text-[11px] text-amber-900 dark:text-amber-300 flex items-start space-x-2">
                   <span className="text-sm leading-none mt-0.5">💡</span>
                   <span>
-                    Hệ thống sẽ <strong>tự động tạo ngay</strong> một sơ đồ công trường gốc và <strong>Kho thiết bị & vật tư</strong> riêng cho dự án này để sẵn sàng tiếp nhận tài sản và điều chuyển thiết bị.
+                    {MESSAGES.PROJECT_AUTO_SETUP}
                   </span>
                 </div>
               </div>
@@ -798,7 +799,7 @@ export const LocationsView: React.FC<LocationsViewProps> = ({
                   disabled={projLoading}
                   className="flex-1 sm:flex-none px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer min-h-[44px] flex items-center justify-center"
                 >
-                  {projLoading ? 'Đang khởi tạo...' : 'Tạo Dự án & Khởi tạo Sơ đồ'}
+                  {projLoading ? MESSAGES.SAVING : MESSAGES.CREATE_PROJECT_PLAN}
                 </button>
               </div>
             </form>

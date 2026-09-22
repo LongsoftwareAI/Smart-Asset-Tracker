@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../types';
+import * as MESSAGES from '../../shared/messages';
 
 interface AuthContextValue {
   user: User | null;
@@ -23,14 +24,14 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 async function readResponse(response: Response) {
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error?.message || 'Không thể xác thực.');
+  if (!response.ok) throw new Error(body.error?.message || MESSAGES.AUTHENTICATION_FAILED);
   return body as { accessToken: string; user: User };
 }
 
 async function readMessageResponse(response: Response) {
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error?.message || 'Không thể thực hiện yêu cầu.');
-  return String(body.message || 'Thao tác thành công.');
+  if (!response.ok) throw new Error(body.error?.message || MESSAGES.REQUEST_FAILED);
+  return String(body.message || MESSAGES.ACTION_SUCCESS);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -12,6 +12,7 @@ import {
   Check,
 } from 'lucide-react';
 import { api } from '../services/api';
+import * as MESSAGES from '../../shared/messages';
 
 interface Endpoint {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH';
@@ -145,7 +146,7 @@ export const ApiDocsView: React.FC = () => {
       setResponseData(JSON.stringify(data, null, 2));
     } catch (err: any) {
       setResponseStatus(500);
-      setResponseData(JSON.stringify({ error: err.message || 'Lỗi gửi yêu cầu' }, null, 2));
+      setResponseData(JSON.stringify({ error: err.message || MESSAGES.API_REQUEST_FAILED }, null, 2));
     } finally {
       setLoading(false);
     }

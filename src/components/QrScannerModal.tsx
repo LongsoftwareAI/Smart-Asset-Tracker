@@ -23,6 +23,7 @@ import {
 import { Asset, AssetStatus, Location, User } from '../types';
 import { api } from '../services/api';
 import { getStatusConfig } from '../utils/formatters';
+import * as MESSAGES from '../../shared/messages';
 
 interface QrScannerModalProps {
   onClose: () => void;
@@ -119,7 +120,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
         onAssetFound(asset);
       } catch {
         // QR-004 Requirement: If QR not found in system, display "Asset not found"
-        setErrorMsg(`Asset not found (${targetId})`);
+        setErrorMsg(MESSAGES.QR_ASSET_NOT_FOUND(targetId));
         if (typeof navigator !== 'undefined' && navigator.vibrate) {
           navigator.vibrate(200);
         }
@@ -188,7 +189,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Trình duyệt không hỗ trợ WebRTC Camera trực tiếp.');
+          throw new Error(MESSAGES.CAMERA_UNSUPPORTED);
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -222,8 +223,8 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
         console.warn('Camera start error:', err);
         setCameraError(
           err.name === 'NotAllowedError'
-            ? 'Quyền truy cập camera bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt hoặc dùng tính năng tải ảnh/nhập mã.'
-            : 'Không thể mở Camera thiết bị. Vui lòng sử dụng tính năng chụp ảnh hoặc nhập mã.'
+            ? MESSAGES.CAMERA_PERMISSION_DENIED
+            : MESSAGES.CAMERA_OPEN_FAILED
         );
         setCameraActive(false);
       }
@@ -289,9 +290,9 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
       }
 
       // If native detector not available or didn't find, prompt user
-      setErrorMsg('Không tìm thấy mã QR trong ảnh vừa chọn. Vui lòng thử chụp lại cận cảnh hơn.');
+      setErrorMsg(MESSAGES.QR_NOT_FOUND_IN_IMAGE);
     } catch {
-      setErrorMsg('Không thể giải mã ảnh. Vui lòng kiểm tra lại hình ảnh.');
+      setErrorMsg(MESSAGES.QR_DECODE_FAILED);
     } finally {
       setSearching(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -326,12 +327,12 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold tracking-tight text-white flex items-center space-x-1.5">
-                <span>Quét mã QR Di động</span>
+                <span>{MESSAGES.SCAN_TITLE}</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
                   LIVE
                 </span>
               </h2>
-              <p className="text-[11px] text-slate-400">Đưa camera tới tem QR của thiết bị</p>
+              <p className="text-[11px] text-slate-400">{MESSAGES.QR_IMAGE_HELP}</p>
             </div>
           </div>
 
@@ -342,7 +343,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               <button
                 type="button"
                 onClick={handleToggleTorch}
-                title={torchOn ? 'Tắt đèn Flash' : 'Bật đèn Flash'}
+                title={torchOn ? MESSAGES.FLASH_OFF : MESSAGES.FLASH_ON}
                 className={`p-2 rounded-xl transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center ${
                   torchOn ? 'bg-amber-400 text-slate-950 shadow-md' : 'text-slate-300 hover:bg-slate-800'
                 }`}
@@ -356,7 +357,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               <button
                 type="button"
                 onClick={handleFlipCamera}
-                title="Đổi camera trước / sau"
+                title={MESSAGES.FLIP_CAMERA}
                 className="p-2 rounded-xl text-slate-300 hover:bg-slate-800 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <SwitchCamera className="w-5 h-5" />
@@ -371,7 +372,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 stopCamera();
                 onClose();
               }}
-              aria-label="Đóng máy quét"
+              aria-label={MESSAGES.CLOSE_SCANNER}
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <X className="w-6 h-6" />
@@ -419,7 +420,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
               <div className="mt-4 px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-slate-200 text-xs font-medium flex items-center space-x-2">
                 <ScanLine className="w-3.5 h-3.5 text-blue-400 animate-spin" />
-                <span>Căn chỉnh mã QR vào giữa khung ngắm</span>
+                <span>{MESSAGES.QR_ALIGNMENT_HELP}</span>
               </div>
             </div>
           )}
@@ -431,9 +432,9 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 <Camera className="w-8 h-8" />
               </div>
               <div className="space-y-1 max-w-xs">
-                <p className="text-sm font-semibold text-white">Camera chưa được kích hoạt</p>
+                <p className="text-sm font-semibold text-white">{MESSAGES.CAMERA_NOT_ACTIVE}</p>
                 <p className="text-xs text-slate-400">
-                  {cameraError || 'Nhấn nút bên dưới để mở camera hoặc chọn ảnh mã QR từ máy.'}
+                  {cameraError || MESSAGES.CAMERA_FALLBACK_HELP}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center">
@@ -443,7 +444,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                   className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold rounded-xl shadow-lg transition-all cursor-pointer flex items-center space-x-2 min-h-[44px]"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  <span>Kích hoạt lại Camera</span>
+                  <span>{MESSAGES.CAMERA_ACTIVATE}</span>
                 </button>
                 <button
                   type="button"
@@ -451,7 +452,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                   className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center space-x-2 min-h-[44px]"
                 >
                   <Upload className="w-4 h-4 text-emerald-400" />
-                  <span>Chụp / Tải ảnh QR</span>
+                  <span>{MESSAGES.QR_CAPTURE_OR_UPLOAD}</span>
                 </button>
               </div>
             </div>
@@ -472,8 +473,8 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
             <div className="absolute top-4 left-4 right-4 z-30 p-3 bg-rose-950/95 border border-rose-500/80 rounded-2xl shadow-xl flex items-start space-x-2.5 text-rose-100 text-xs backdrop-blur-md animate-in slide-in-from-top-4 duration-200">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <strong className="font-bold block text-rose-200">Không tìm thấy tài sản:</strong>
-                <span>{errorMsg}. Vui lòng kiểm tra lại mã tem QR.</span>
+                <strong className="font-bold block text-rose-200">{MESSAGES.QR_NO_ASSET}</strong>
+                <span>{errorMsg}. {MESSAGES.QR_RETRY_HELP}</span>
               </div>
               <button
                 type="button"
@@ -519,7 +520,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                   onClick={handleResetForNextScan}
                   className="px-2.5 py-1 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700"
                 >
-                  Quét tiếp
+                  {MESSAGES.SCAN_AGAIN}
                 </button>
               </div>
 
@@ -528,7 +529,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 <div className="flex items-center space-x-1.5 truncate">
                   <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span className="truncate">
-                    Vị trí:{' '}
+                    {MESSAGES.LOCATION_LABEL}{' '}
                     <strong>
                       {locations.find((l) => l.location_id === scannedAsset.current_location_id)?.location_name ||
                         scannedAsset.current_location_id}
@@ -538,7 +539,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 <div className="flex items-center space-x-1.5 truncate">
                   <UserIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span className="truncate">
-                    Người giữ:{' '}
+                    {MESSAGES.HOLDER_LABEL}{' '}
                     <strong>
                       {users.find((u) => u.user_id === scannedAsset.current_user_id)?.name ||
                         (scannedAsset.current_user_id ? scannedAsset.current_user_id : 'Trong kho')}
@@ -559,7 +560,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                     className="col-span-2 py-3 bg-blue-600 hover:bg-blue-500 active:scale-98 text-white rounded-xl text-sm font-bold shadow-lg transition-all flex items-center justify-center space-x-2 min-h-[48px] cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Check-out (Mượn thiết bị này)</span>
+                    <span>{MESSAGES.CHECKOUT_THIS_ASSET}</span>
                   </button>
                 )}
 
@@ -573,7 +574,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                     className="col-span-2 py-3 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white rounded-xl text-sm font-bold shadow-lg transition-all flex items-center justify-center space-x-2 min-h-[48px] cursor-pointer"
                   >
                     <LogIn className="w-4 h-4" />
-                    <span>Check-in (Hoàn trả thiết bị này)</span>
+                    <span>{MESSAGES.CHECKIN_THIS_ASSET}</span>
                   </button>
                 )}
 
@@ -587,7 +588,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                     className="py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-98 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition-all flex items-center justify-center space-x-1.5 min-h-[44px] cursor-pointer"
                   >
                     <ArrowRightLeft className="w-4 h-4 text-slate-400" />
-                    <span>Chuyển vị trí</span>
+                    <span>{MESSAGES.MOVE_THIS_ASSET}</span>
                   </button>
                 )}
 
@@ -601,7 +602,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                     className="py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-98 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition-all flex items-center justify-center space-x-1.5 min-h-[44px] cursor-pointer"
                   >
                     <Eye className="w-4 h-4 text-blue-400" />
-                    <span>Xem chi tiết</span>
+                    <span>{MESSAGES.VIEW_DETAILS}</span>
                   </button>
                 )}
               </div>
@@ -619,7 +620,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               className="text-blue-400 hover:text-blue-300 font-medium flex items-center space-x-1.5 py-1 px-2 rounded-lg hover:bg-slate-800/80 transition-colors cursor-pointer"
             >
               <Upload className="w-4 h-4" />
-              <span>Chụp ảnh / Tải ảnh QR từ máy</span>
+              <span>{MESSAGES.QR_UPLOAD_FROM_DEVICE}</span>
             </button>
 
             <button
@@ -627,7 +628,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               onClick={() => setShowManualSection(!showManualSection)}
               className="text-slate-400 hover:text-slate-200 font-medium py-1 px-2 rounded-lg hover:bg-slate-800/80 transition-colors cursor-pointer"
             >
-              {showManualSection ? 'Ẩn nhập tay' : 'Nhập mã tay / Test'}
+              {showManualSection ? MESSAGES.HIDE_MANUAL_INPUT : MESSAGES.QR_MANUAL_INPUT}
             </button>
           </div>
 
@@ -643,7 +644,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                     type="text"
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
-                    placeholder="Nhập ID: DRILL-021..."
+                    placeholder={MESSAGES.QR_ID_PLACEHOLDER}
                     className="w-full pl-9 pr-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                   />
                 </div>
@@ -653,7 +654,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                   disabled={searching || !manualCode.trim()}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 min-h-[40px]"
                 >
-                  {searching ? 'Tìm...' : 'Tra cứu'}
+                  {searching ? MESSAGES.QR_SEARCHING : MESSAGES.QR_SEARCH}
                 </button>
               </form>
 
@@ -661,7 +662,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5 flex items-center space-x-1">
                   <Sparkles className="w-3 h-3 text-amber-400" />
-                  <span>Mã mẫu kiểm tra nhanh (1 chạm):</span>
+                  <span>{MESSAGES.QUICK_TEST_CODES}</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                   {allAssets.slice(0, 6).map((item) => (
@@ -680,7 +681,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                     onClick={() => processScanCode('DRILL-UNKNOWN-999')}
                     className="px-2 py-1 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 rounded-lg text-[11px] font-mono transition-colors cursor-pointer"
                   >
-                    Test lỗi QR-004
+                      {MESSAGES.QR_ERROR_TEST}
                   </button>
                 </div>
               </div>

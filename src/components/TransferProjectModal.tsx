@@ -3,6 +3,7 @@ import { X, ArrowRightLeft, Building2, MapPin, Check, AlertCircle } from 'lucide
 import { Asset, Location, Project, User } from '../types';
 import { api } from '../services/api';
 import { getLocationName } from '../utils/formatters';
+import * as MESSAGES from '../../shared/messages';
 
 interface TransferProjectModalProps {
   asset: Asset | null;
@@ -36,7 +37,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
     targetLocations[0]?.location_id || 'LOC-WAREHOUSE'
   );
   const [userId, setUserId] = useState<string>(asset?.current_user_id || users[0]?.user_id || '');
-  const [note, setNote] = useState<string>('Điều chuyển thiết bị sang công trường mới phục vụ thi công');
+  const [note, setNote] = useState<string>(MESSAGES.TRANSFER_DEFAULT_NOTE);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -56,11 +57,11 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!toProjectId) {
-      setErrorMsg('Vui lòng chọn công trường/dự án tiếp nhận');
+      setErrorMsg(MESSAGES.TARGET_PROJECT_REQUIRED);
       return;
     }
     if (toProjectId === asset.project_id) {
-      setErrorMsg('Dự án tiếp nhận phải khác dự án hiện tại');
+      setErrorMsg(MESSAGES.SAME_PROJECT);
       return;
     }
 
@@ -77,7 +78,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Điều chuyển dự án thất bại');
+      setErrorMsg(err.message || MESSAGES.TRANSFER_FAILED);
     } finally {
       setLoading(false);
     }
@@ -93,16 +94,16 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base text-white">Điều chuyển công trường / Dự án</h3>
+              <h3 className="font-bold text-sm sm:text-base text-white">{MESSAGES.TRANSFER_TITLE}</h3>
               <p className="text-[11px] text-slate-400">
-                Điều động thiết bị giữa các công trình độc lập
+                {MESSAGES.TRANSFER_HELP}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -131,7 +132,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
                 </span>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Vị trí hiện tại:</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">{MESSAGES.TRANSFER_CURRENT_LOCATION}</span>
                 <span className="text-xs font-medium text-slate-700 dark:text-slate-300 block truncate max-w-[140px]">
                   {currentLocationName}
                 </span>
@@ -142,25 +143,25 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
             <div className="p-3 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/80 rounded-xl flex items-center justify-between text-xs gap-2">
               <div className="flex-1 min-w-0">
                 <span className="text-[10px] text-amber-700 dark:text-amber-400 uppercase font-bold block mb-0.5">
-                  Dự án hiện tại
+                  {MESSAGES.CURRENT_PROJECT}
                 </span>
                 <span
                   className="font-semibold text-slate-900 dark:text-white block truncate"
-                  title={currentProject ? `${currentProject.project_code} - ${currentProject.project_name}` : 'Kho Trung Tâm'}
+                  title={currentProject ? `${currentProject.project_code} - ${currentProject.project_name}` : MESSAGES.CENTRAL_WAREHOUSE}
                 >
-                  {currentProject ? `${currentProject.project_code} - ${currentProject.project_name}` : 'Kho Trung Tâm'}
+                  {currentProject ? `${currentProject.project_code} - ${currentProject.project_name}` : MESSAGES.CENTRAL_WAREHOUSE}
                 </span>
               </div>
               <ArrowRightLeft className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mx-1" />
               <div className="flex-1 min-w-0 text-right">
                 <span className="text-[10px] text-emerald-700 dark:text-emerald-400 uppercase font-bold block mb-0.5">
-                  Dự án tiếp nhận
+                  {MESSAGES.TARGET_PROJECT}
                 </span>
                 <span
                   className="font-semibold text-emerald-900 dark:text-emerald-300 block truncate"
-                  title={targetProject ? `${targetProject.project_code} - ${targetProject.project_name}` : 'Chọn bên dưới'}
+                  title={targetProject ? `${targetProject.project_code} - ${targetProject.project_name}` : MESSAGES.SELECT_BELOW}
                 >
-                  {targetProject ? `${targetProject.project_code} - ${targetProject.project_name}` : 'Chọn bên dưới'}
+                  {targetProject ? `${targetProject.project_code} - ${targetProject.project_name}` : MESSAGES.SELECT_BELOW}
                 </span>
               </div>
             </div>
@@ -168,7 +169,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
             {/* Select Target Project */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Chọn công trường / dự án điều chuyển đến <span className="text-red-500">*</span>
+                {MESSAGES.SELECT_TARGET_PROJECT} <span className="text-red-500">*</span>
               </label>
               <select
                 id="transfer-target-project-select"
@@ -188,8 +189,8 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
             {/* Select Initial Location at Target Site */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                <span>Vị trí lưu kho / bàn giao tại công trình mới</span>
-                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded">Theo dự án đích</span>
+                <span>{MESSAGES.TRANSFER_TARGET_LOCATION}</span>
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded">{MESSAGES.TARGET_PROJECT_LOCATION_HELP}</span>
               </label>
               <select
                 id="transfer-target-location-select"
@@ -198,7 +199,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
                 className="w-full max-w-full text-xs sm:text-sm p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
               >
                 {targetLocations.length === 0 ? (
-                  <option value="LOC-WAREHOUSE">Kho tổng mặc định</option>
+                  <option value="LOC-WAREHOUSE">{MESSAGES.DEFAULT_WAREHOUSE}</option>
                 ) : (
                   targetLocations.map((loc) => (
                     <option key={loc.location_id} value={loc.location_id}>
@@ -212,7 +213,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
             {/* Manager / Supervisor Performing */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Cán bộ phụ trách bàn giao
+                {MESSAGES.TRANSFER_PERFORMER_LABEL}
               </label>
               <select
                 id="transfer-user-select"
@@ -231,13 +232,13 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
             {/* Transfer Note / Dispatch Order */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Lệnh điều động / Ghi chú bàn giao
+                {MESSAGES.TRANSFER_COMMAND_LABEL}
               </label>
               <textarea
                 rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="VD: Điều động theo lệnh số 45/LĐ-2026 sang thi công hạng mục móng..."
+                placeholder={MESSAGES.TRANSFER_NOTE_PLACEHOLDER}
                 className="w-full max-w-full text-xs sm:text-sm p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
@@ -250,7 +251,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer min-h-[44px]"
             >
-              Hủy
+              {MESSAGES.CANCEL}
             </button>
             <button
               type="submit"
@@ -258,7 +259,7 @@ export const TransferProjectModal: React.FC<TransferProjectModalProps> = ({
               className="px-5 py-2 bg-amber-600 hover:bg-amber-500 active:scale-95 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center space-x-1.5 min-h-[44px]"
             >
               <Check className="w-4 h-4" />
-              <span>{loading ? 'Đang điều chuyển...' : 'Xác nhận điều chuyển'}</span>
+              <span>{loading ? MESSAGES.UPDATING : MESSAGES.ACTION_CONFIRM_TRANSFER}</span>
             </button>
           </div>
         </form>

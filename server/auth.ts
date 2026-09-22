@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
+import * as MESSAGES from '../shared/messages.js';
 
 export type AuthRole = 'ADMIN' | 'MANAGER' | 'STAFF';
 
@@ -17,7 +18,7 @@ export function normalizeEmail(email: string): string {
 
 export function validatePassword(password: string): string | null {
   if (password.length < 12) {
-    return 'Mật khẩu phải có ít nhất 12 ký tự.';
+    return MESSAGES.PASSWORD_TOO_SHORT;
   }
 
   return null;
@@ -32,7 +33,7 @@ interface RegistrationInput {
 
 export function validateRegistration(input: RegistrationInput): string | null {
   if (typeof input.name !== 'string' || input.name.trim().length < 2 || input.name.trim().length > 100) {
-    return 'Họ tên phải có từ 2 đến 100 ký tự.';
+    return MESSAGES.INVALID_NAME;
   }
 
   if (
@@ -40,15 +41,15 @@ export function validateRegistration(input: RegistrationInput): string | null {
     input.email.trim().length > 255 ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())
   ) {
-    return 'Email không hợp lệ.';
+    return MESSAGES.INVALID_EMAIL;
   }
 
-  if (typeof input.password !== 'string') return 'Mật khẩu là bắt buộc.';
+  if (typeof input.password !== 'string') return MESSAGES.PASSWORD_REQUIRED;
   const passwordError = validatePassword(input.password);
   if (passwordError) return passwordError;
 
   if (input.department !== undefined && (typeof input.department !== 'string' || input.department.trim().length > 100)) {
-    return 'Phòng ban không hợp lệ.';
+    return MESSAGES.INVALID_DEPARTMENT;
   }
 
   return null;

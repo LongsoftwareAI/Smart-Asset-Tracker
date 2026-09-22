@@ -3,6 +3,7 @@ import { X, Printer, Download, QrCode, Tag, Check } from 'lucide-react';
 import { Asset, AssetCategory } from '../types';
 import { generateQrDataUrl } from '../utils/qr';
 import { getCategoryName } from '../utils/formatters';
+import * as MESSAGES from '../../shared/messages';
 
 interface QrCodeModalProps {
   asset: Asset | null;
@@ -40,12 +41,12 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({ asset, onClose, catego
         <div className="bg-slate-900 dark:bg-slate-950 text-white px-5 py-3.5 flex items-center justify-between shrink-0 border-b border-slate-800">
           <div className="flex items-center space-x-2">
             <QrCode className="w-4 h-4 text-blue-400" />
-            <span className="text-sm font-bold">QR Asset Identifier (Mục 8)</span>
+            <span className="text-sm font-bold">{MESSAGES.QR_TITLE}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -72,7 +73,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({ asset, onClose, catego
                 />
               ) : (
                 <div className="w-48 h-48 flex items-center justify-center text-xs text-slate-400">
-                  Đang tạo mã QR...
+                  {MESSAGES.QR_LOADING}
                 </div>
               )}
             </div>
@@ -103,7 +104,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({ asset, onClose, catego
               className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center space-x-1 min-h-[36px]"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Tag className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Đã sao chép' : 'Copy mã'}</span>
+                  <span>{copied ? MESSAGES.COPIED : MESSAGES.COPY_CODE}</span>
             </button>
 
             {qrUrl && (
@@ -113,7 +114,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({ asset, onClose, catego
                 className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center space-x-1 min-h-[36px]"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Tải ảnh PNG</span>
+                <span>{MESSAGES.DOWNLOAD_PNG}</span>
               </a>
             )}
 
@@ -122,7 +123,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({ asset, onClose, catego
               className="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition-colors cursor-pointer flex items-center space-x-1 min-h-[36px]"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>In nhãn</span>
+              <span>{MESSAGES.PRINT_LABEL}</span>
             </button>
           </div>
         </div>

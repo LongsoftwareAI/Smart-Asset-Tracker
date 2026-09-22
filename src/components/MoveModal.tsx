@@ -3,6 +3,7 @@ import { X, ArrowRightLeft, MapPin, ArrowDown, Check } from 'lucide-react';
 import { Asset, Location, User } from '../types';
 import { api } from '../services/api';
 import { getLocationName } from '../utils/formatters';
+import * as MESSAGES from '../../shared/messages';
 
 interface MoveModalProps {
   asset: Asset | null;
@@ -23,7 +24,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
     locations.find((l) => l.location_id !== asset?.current_location_id)?.location_id || ''
   );
   const [userId, setUserId] = useState<string>(asset?.current_user_id || users[0]?.user_id || '');
-  const [note, setNote] = useState<string>('Di chuyển thiết bị sang khu vực làm việc mới');
+  const [note, setNote] = useState<string>(MESSAGES.MOVE_DEFAULT_NOTE);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -34,11 +35,11 @@ export const MoveModal: React.FC<MoveModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLocationId) {
-      setErrorMsg('Vui lòng chọn vị trí mới');
+      setErrorMsg(MESSAGES.RETURN_LOCATION_REQUIRED);
       return;
     }
     if (newLocationId === asset.current_location_id) {
-      setErrorMsg('Vị trí mới phải khác vị trí hiện tại');
+      setErrorMsg(MESSAGES.SAME_LOCATION);
       return;
     }
 
@@ -54,7 +55,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Di chuyển thất bại');
+      setErrorMsg(err.message || MESSAGES.MOVE_FAILED);
     } finally {
       setLoading(false);
     }
@@ -70,14 +71,14 @@ export const MoveModal: React.FC<MoveModalProps> = ({
               <ArrowRightLeft className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold">Move (Chuyển vị trí thiết bị)</h3>
-              <p className="text-[11px] text-slate-400">Cập nhật vị trí công tác mới</p>
+              <h3 className="text-sm sm:text-base font-bold">{MESSAGES.MOVE_TITLE}</h3>
+              <p className="text-[11px] text-slate-400">{MESSAGES.MOVE_HELP}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -89,7 +90,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
           {/* Scrollable Form Body */}
           <div className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden flex-1">
           <div className="text-xs text-slate-600 dark:text-slate-300">
-            Cập nhật vị trí công tác mới của thiết bị trong ca làm việc mà không cần phải làm thủ tục Check-in/Check-out lại từ đầu.
+            {MESSAGES.MOVE_EXPLANATION}
           </div>
 
           {errorMsg && (
@@ -103,7 +104,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
             {/* Current Location */}
             <div>
               <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-                Current Location (Vị trí hiện tại):
+                {MESSAGES.MOVE_CURRENT_LOCATION}
               </span>
               <div className="flex items-center space-x-2 text-sm font-bold text-slate-800 dark:text-white mt-1">
                 <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -122,7 +123,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
             {/* New Location Selector */}
             <div>
               <label className="text-[11px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider block mb-1">
-                New Location (Vị trí mới đến) *
+                {MESSAGES.MOVE_NEW_LOCATION}
               </label>
               <select
                 id="move-new-location-select"
@@ -131,7 +132,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
                 className="w-full text-xs py-2 px-3 bg-white dark:bg-slate-800 border border-blue-300 dark:border-blue-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
                 required
               >
-                <option value="">-- Chọn vị trí mới --</option>
+                <option value="">{MESSAGES.NEW_LOCATION_PLACEHOLDER}</option>
                 {(() => {
                   const sameProjectLocs = locations.filter(
                     (loc) => (loc.project_id === asset.project_id || (!loc.project_id && asset.project_id === 'PROJ-CENTRAL')) && loc.location_id !== asset.current_location_id
@@ -143,7 +144,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
                   return (
                     <>
                       {sameProjectLocs.length > 0 && (
-                        <optgroup label="📍 Khu vực trong cùng dự án này">
+                        <optgroup label={MESSAGES.SAME_PROJECT_LOCATIONS}>
                           {sameProjectLocs.map((loc) => (
                             <option key={loc.location_id} value={loc.location_id}>
                               [{loc.location_type}] {loc.location_name}
@@ -152,7 +153,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
                         </optgroup>
                       )}
                       {otherLocs.length > 0 && (
-                        <optgroup label="🌐 Khu vực dự án khác (Nên dùng tính năng Điều chuyển)">
+                        <optgroup label={MESSAGES.OTHER_PROJECT_LOCATIONS}>
                           {otherLocs.map((loc) => (
                             <option key={loc.location_id} value={loc.location_id}>
                               [{loc.location_type}] {loc.location_name}
@@ -170,7 +171,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
           {/* User handling */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Người thực hiện di chuyển
+              {MESSAGES.MOVE_PERFORMER_LABEL}
             </label>
             <select
               value={userId}
@@ -187,13 +188,13 @@ export const MoveModal: React.FC<MoveModalProps> = ({
 
           {/* Note */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lý do di chuyển (Ghi chú)</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{MESSAGES.MOVE_NOTE_LABEL}</label>
             <input
               id="move-note"
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Ví dụ: Đưa lên tầng 2 Zone B khoan giầm thép..."
+              placeholder={MESSAGES.MOVE_NOTE_PLACEHOLDER}
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -206,7 +207,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
             onClick={onClose}
             className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer min-h-[44px] flex items-center justify-center"
           >
-            Hủy
+            {MESSAGES.CANCEL}
           </button>
           <button
             id="btn-confirm-move"
@@ -215,7 +216,7 @@ export const MoveModal: React.FC<MoveModalProps> = ({
             className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center space-x-2 min-h-[44px]"
           >
             <Check className="w-4 h-4" />
-            <span>{loading ? 'Đang cập nhật...' : 'XÁC NHẬN MOVE'}</span>
+            <span>{loading ? MESSAGES.UPDATING : MESSAGES.ACTION_CONFIRM_MOVE}</span>
           </button>
         </div>
       </form>

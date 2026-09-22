@@ -1,4 +1,5 @@
 import { AssetStatus, Location, User, AssetCategory } from '../types';
+import * as MESSAGES from '../../shared/messages';
 
 export function formatDateTime(isoString?: string | null): string {
   if (!isoString) return '—';
@@ -107,19 +108,19 @@ export function getStatusConfig(status: AssetStatus) {
 }
 
 export function getLocationName(locations: Location[], locationId?: string | null): string {
-  if (!locationId) return 'Chưa xác định';
+  if (!locationId) return MESSAGES.UNKNOWN_LOCATION;
   const loc = locations.find((l) => l.location_id === locationId);
   return loc ? loc.location_name : locationId;
 }
 
 export function getUserName(users: User[], userId?: string | null): string {
-  if (!userId) return 'Chưa có';
+  if (!userId) return MESSAGES.NO_ASSIGNEE;
   const u = users.find((user) => user.user_id === userId);
   return u ? u.name : userId;
 }
 
 export function getCategoryName(categories: AssetCategory[], categoryId?: string | null): string {
-  if (!categoryId) return 'Khác';
+  if (!categoryId) return MESSAGES.OTHER_CATEGORY;
   const cat = categories.find((c) => c.category_id === categoryId);
   return cat ? cat.category_name : categoryId;
 }

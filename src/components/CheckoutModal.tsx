@@ -3,6 +3,7 @@ import { X, LogOut, AlertCircle, Calendar, MapPin, User as UserIcon, Check } fro
 import { Asset, AssetCategory, AssetStatus, Location, User } from '../types';
 import { api } from '../services/api';
 import { getCategoryName, getLocationName, getUserName } from '../utils/formatters';
+import * as MESSAGES from '../../shared/messages';
 
 interface CheckoutModalProps {
   asset: Asset | null;
@@ -26,7 +27,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     asset?.current_location_id || locations[0]?.location_id || ''
   );
   const [expectedReturnDate, setExpectedReturnDate] = useState<string>('');
-  const [note, setNote] = useState<string>('Mượn thiết bị phục vụ thi công');
+  const [note, setNote] = useState<string>(MESSAGES.CHECKOUT_NOTE);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -39,12 +40,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isBlocked) {
-      setErrorMsg(`Asset is currently in use by ${currentOwner || 'another user'}. (BR-004)`);
+      setErrorMsg(MESSAGES.CHECKOUT_CONFLICT(currentOwner || 'another user'));
       return;
     }
 
     if (!selectedUserId) {
-      setErrorMsg('Vui lòng chọn người sử dụng (Used by)');
+      setErrorMsg(MESSAGES.HOLDER_REQUIRED);
       return;
     }
 
@@ -61,7 +62,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Check-out thất bại');
+      setErrorMsg(err.message || MESSAGES.CHECKOUT_FAILED);
     } finally {
       setLoading(false);
     }
@@ -77,14 +78,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <LogOut className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold">Check-out (Mượn tài sản)</h3>
-              <p className="text-[11px] text-slate-400">Gán người chịu trách nhiệm & vị trí</p>
+              <h3 className="text-sm sm:text-base font-bold">{MESSAGES.CHECKOUT_TITLE}</h3>
+              <p className="text-[11px] text-slate-400">{MESSAGES.CHECKOUT_HELP}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -108,7 +109,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 block">Status:</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 block">{MESSAGES.STATUS_LABEL}</span>
                 <span
                   className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${
                     asset.status === AssetStatus.AVAILABLE
@@ -127,8 +128,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-xl flex items-start space-x-2 text-rose-800 dark:text-rose-300 text-xs">
               <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <div>
-                <strong className="block font-bold">Không thể Check-out:</strong>
-                Asset is currently in use by {currentOwner || 'người khác'}. Trạng thái hiện tại: {asset.status}. (Tuân thủ BR-004 & AC-004).
+                <strong className="block font-bold">{MESSAGES.CHECKOUT_BLOCKED}</strong>
+                {MESSAGES.CHECKOUT_BLOCKED_DETAIL(currentOwner || MESSAGES.ANOTHER_USER, asset.status)}
               </div>
             </div>
           )}
@@ -143,7 +144,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
               <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-              <span>Người sử dụng (Used by) *</span>
+              <span>{MESSAGES.USER_LABEL}</span>
             </label>
             <select
               id="checkout-user-select"
@@ -153,7 +154,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               required
             >
-              <option value="">-- Chọn nhân viên tiếp nhận --</option>
+              <option value="">{MESSAGES.SELECT_RECEIVING_USER}</option>
               {users.map((u) => (
                 <option key={u.user_id} value={u.user_id}>
                   {u.name} — {u.department} ({u.role})
@@ -166,7 +167,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
               <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>Vị trí mang đến sử dụng (Location) *</span>
+              <span>{MESSAGES.USAGE_LOCATION_LABEL}</span>
             </label>
             <select
               id="checkout-location-select"
@@ -191,7 +192,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>Thời gian dự kiến hoàn trả (Expected return)</span>
+              <span>{MESSAGES.EXPECTED_RETURN_LABEL}</span>
             </label>
             <input
               id="checkout-expected-return"
@@ -205,13 +206,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
           {/* Note Input (Section 12: Note: [______]) */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ghi chú (Note)</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{MESSAGES.CHECKOUT_NOTE_LABEL}</label>
             <input
               id="checkout-note"
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Mục đích sử dụng, vị trí chi tiết..."
+              placeholder={MESSAGES.CHECKOUT_NOTE_PLACEHOLDER}
               disabled={isBlocked}
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             />
@@ -234,7 +235,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center space-x-2 min-h-[44px]"
           >
             <Check className="w-4 h-4" />
-            <span>{loading ? 'Đang xử lý...' : 'XÁC NHẬN CHECK-OUT'}</span>
+            <span>{loading ? MESSAGES.PROCESSING : MESSAGES.ACTION_CONFIRM_CHECKOUT}</span>
           </button>
         </div>
       </form>

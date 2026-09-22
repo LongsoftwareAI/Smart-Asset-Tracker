@@ -13,6 +13,7 @@ import {
 import { getPool, withTransaction } from '../db.js';
 import { authenticate, type AuthenticatedRequest } from '../middleware/auth.js';
 import { sendPasswordResetEmail } from '../services/emailService.js';
+import * as MESSAGES from '../../shared/messages.js';
 
 const REFRESH_COOKIE = 'assetmate_refresh';
 const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -82,7 +83,7 @@ function authRateLimit(req: Request, res: Response, next: () => void) {
 
   authAttempts.set(key, attempt);
   if (attempt.count > AUTH_RATE_LIMIT) {
-    return sendError(res, 429, 'RATE_LIMITED', 'Vui lòng thử lại sau.');
+    return sendError(res, 429, 'RATE_LIMITED', MESSAGES.RATE_LIMITED);
   }
 
   return next();
@@ -130,12 +131,12 @@ const asyncRoute = (
 authRouter.post('/login', authRateLimit, asyncRoute(async (req, res) => {
   const { email, password } = req.body ?? {};
   if (typeof email !== 'string' || typeof password !== 'string') {
-    return sendError(res, 400, 'VALIDATION_ERROR', 'Email và mật khẩu là bắt buộc.');
+    return sendError(res, 400, 'VALIDATION_ERROR', MESSAGES.LOGIN_FIELDS_REQUIRED);
   }
 
   const user = await findUserByEmail(normalizeEmail(email));
   if (!user || !user.is_active || !(await bcrypt.compare(password, user.password_hash))) {
-    return sendError(res, 401, 'INVALID_CREDENTIALS', 'Email hoặc mật khẩu không đúng.');
+    return sendError(res, 401, 'INVALID_CREDENTIALS', MESSAGES.WRONG_PASSWORD);
   }
 
   const refreshToken = await withTransaction(async (client) => {
@@ -171,18 +172,18 @@ authRouter.post('/register', authRateLimit, asyncRoute(async (req, res) => {
     });
   } catch (error) {
     if ((error as { code?: string }).code === '23505') {
-      return sendError(res, 409, 'EMAIL_IN_USE', 'Email này đã được sử dụng.');
+      return sendError(res, 409, 'EMAIL_IN_USE', MESSAGES.EMAIL_IN_USE);
     }
     throw error;
   }
 
-  return res.status(201).json({ message: 'Tạo tài khoản thành công. Vui lòng đăng nhập.' });
+  return res.status(201).json({ message: MESSAGES.REGISTER_SUCCESS });
 }));
 
 authRouter.post('/refresh', authRateLimit, asyncRoute(async (req, res) => {
   const refreshToken = readCookie(req, REFRESH_COOKIE);
   if (!refreshToken) {
-    return sendError(res, 401, 'UNAUTHENTICATED', 'Phiên đăng nhập đã hết hạn.');
+    return sendError(res, 401, 'UNAUTHENTICATED', MESSAGES.SESSION_EXPIRED);
   }
 
   const result = await withTransaction(async (client) => {
@@ -205,7 +206,7 @@ authRouter.post('/refresh', authRateLimit, asyncRoute(async (req, res) => {
 
   if (!result) {
     res.clearCookie(REFRESH_COOKIE, refreshCookieOptions());
-    return sendError(res, 401, 'UNAUTHENTICATED', 'Phiên đăng nhập đã hết hạn.');
+    return sendError(res, 401, 'UNAUTHENTICATED', MESSAGES.SESSION_EXPIRED);
   }
 
   res.cookie(REFRESH_COOKIE, result.nextRefreshToken, refreshCookieOptions());
@@ -236,14 +237,14 @@ authRouter.get('/me', authenticate, asyncRoute(async (req, res) => {
     [auth.userId]
   );
   const user = result.rows[0];
-  if (!user) return sendError(res, 401, 'UNAUTHENTICATED', 'Phiên đăng nhập đã hết hạn.');
+  if (!user) return sendError(res, 401, 'UNAUTHENTICATED', MESSAGES.SESSION_EXPIRED);
 
   return res.json({ user: publicUser(user) });
 }));
 
 authRouter.post('/forgot-password', authRateLimit, asyncRoute(async (req, res) => {
   const { email } = req.body ?? {};
-  const message = 'Nếu email tồn tại trong hệ thống, hướng dẫn đặt lại mật khẩu đã được gửi.';
+  const message = MESSAGES.FORGOT_PASSWORD_GENERIC;
   if (typeof email !== 'string') return res.json({ message });
 
   const user = await findUserByEmail(normalizeEmail(email));
@@ -276,7 +277,7 @@ authRouter.post('/forgot-password', authRateLimit, asyncRoute(async (req, res) =
 authRouter.post('/reset-password', authRateLimit, asyncRoute(async (req, res) => {
   const { token, newPassword } = req.body ?? {};
   if (typeof token !== 'string' || typeof newPassword !== 'string') {
-    return sendError(res, 400, 'VALIDATION_ERROR', 'Token và mật khẩu mới là bắt buộc.');
+    return sendError(res, 400, 'VALIDATION_ERROR', MESSAGES.RESET_PASSWORD_FIELDS_REQUIRED);
   }
   const passwordError = validatePassword(newPassword);
   if (passwordError) return sendError(res, 422, 'VALIDATION_ERROR', passwordError);
@@ -303,8 +304,8 @@ authRouter.post('/reset-password', authRateLimit, asyncRoute(async (req, res) =>
   });
 
   if (!completed) {
-    return sendError(res, 400, 'INVALID_RESET_TOKEN', 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
+    return sendError(res, 400, 'INVALID_RESET_TOKEN', MESSAGES.INVALID_RESET_TOKEN);
   }
 
-  return res.json({ message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.' });
+  return res.json({ message: MESSAGES.RESET_PASSWORD_SUCCESS });
 }));

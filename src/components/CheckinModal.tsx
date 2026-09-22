@@ -3,6 +3,7 @@ import { X, LogIn, MapPin, CheckCircle, AlertTriangle, User as UserIcon } from '
 import { Asset, AssetStatus, Location, User } from '../types';
 import { api } from '../services/api';
 import { getUserName } from '../utils/formatters';
+import * as MESSAGES from '../../shared/messages';
 
 interface CheckinModalProps {
   asset: Asset | null;
@@ -27,7 +28,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
   const [returnLocationId, setReturnLocationId] = useState<string>(defaultWarehouse);
   const [returnedByUserId, setReturnedByUserId] = useState<string>(asset?.current_user_id || users[0]?.user_id || '');
   const [conditionStatus, setConditionStatus] = useState<AssetStatus>(AssetStatus.AVAILABLE);
-  const [note, setNote] = useState<string>('Hoàn trả thiết bị về kho sau khi hoàn thành công việc');
+  const [note, setNote] = useState<string>(MESSAGES.CHECKIN_DEFAULT_NOTE);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -50,7 +51,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Check-in thất bại');
+      setErrorMsg(err.message || MESSAGES.CHECKIN_FAILED);
     } finally {
       setLoading(false);
     }
@@ -66,14 +67,14 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
               <LogIn className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold">Check-in (Hoàn trả thiết bị)</h3>
-              <p className="text-[11px] text-slate-400">Cập nhật vị trí kho & tình trạng máy</p>
+              <h3 className="text-sm sm:text-base font-bold">{MESSAGES.CHECKIN_TITLE}</h3>
+              <p className="text-[11px] text-slate-400">{MESSAGES.CHECKIN_HELP}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={MESSAGES.CLOSE_MODAL}
             className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -94,11 +95,11 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
                 <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-1">{asset.asset_name}</h4>
                 <div className="text-xs text-slate-600 dark:text-slate-300 flex items-center space-x-1 mt-1">
                   <UserIcon className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Đang giữ: <strong>{currentHolderName}</strong></span>
+                  <span>{MESSAGES.CURRENT_HOLDER} <strong>{currentHolderName}</strong></span>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 block">Status sau Check-in:</span>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 block">{MESSAGES.CHECKIN_STATUS_LABEL}</span>
                 <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                   {conditionStatus}
                 </span>
@@ -116,7 +117,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
               <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>Vị trí hoàn trả (Return Location) *</span>
+              <span>{MESSAGES.RETURN_LOCATION_LABEL}</span>
             </label>
             <select
               id="checkin-location-select"
@@ -132,7 +133,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
               ))}
             </select>
             <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-              Thông thường hoàn trả về Warehouse hoặc kho lưu trữ khu vực.
+              {MESSAGES.WAREHOUSE_RETURN_HELP}
             </p>
           </div>
 
@@ -140,7 +141,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
               <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-              <span>Người bàn giao trả lại (Returned by) *</span>
+              <span>{MESSAGES.RETURNED_BY_LABEL}</span>
             </label>
             <select
               id="checkin-user-select"
@@ -160,7 +161,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
           {/* Condition check */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Tình trạng thiết bị khi thu hồi
+              {MESSAGES.DEVICE_CONDITION}
             </label>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <button
@@ -172,7 +173,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                Tốt / Sẵn sàng
+                {MESSAGES.GOOD_AVAILABLE}
               </button>
               <button
                 type="button"
@@ -183,7 +184,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                Cần bảo trì
+                {MESSAGES.NEEDS_MAINTENANCE}
               </button>
               <button
                 type="button"
@@ -194,20 +195,20 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                Hư hỏng
+                {MESSAGES.DAMAGED_CONDITION}
               </button>
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ghi chú kiểm tra (Note)</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{MESSAGES.CHECKIN_NOTE_LABEL}</label>
             <input
               id="checkin-note"
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Ghi chú về tình trạng, phụ kiện kèm theo..."
+              placeholder={MESSAGES.CHECKIN_NOTE_PLACEHOLDER}
               className="w-full text-xs py-2 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -220,7 +221,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
             onClick={onClose}
             className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer min-h-[44px] flex items-center justify-center"
           >
-            Hủy bỏ
+            {MESSAGES.CANCEL}
           </button>
           <button
             id="btn-confirm-checkin"
@@ -229,7 +230,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
             className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center space-x-2 min-h-[44px]"
           >
             <CheckCircle className="w-4 h-4" />
-            <span>{loading ? 'Đang hoàn trả...' : 'XÁC NHẬN CHECK-IN'}</span>
+            <span>{loading ? MESSAGES.CHECKIN_LOADING : MESSAGES.ACTION_CONFIRM_CHECKIN}</span>
           </button>
         </div>
       </form>

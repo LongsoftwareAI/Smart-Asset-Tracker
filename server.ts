@@ -23,6 +23,7 @@ import {
   Project,
   User,
 } from './src/types';
+import * as MESSAGES from './shared/messages';
 
 // In-memory persistent database store (Ready for On-Premise SQLite/PostgreSQL adaptation)
 let projects: Project[] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
@@ -87,7 +88,7 @@ async function startServer() {
     categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
     transactions = JSON.parse(JSON.stringify(INITIAL_TRANSACTIONS));
     auditLogs = JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS));
-    res.json({ success: true, message: 'Database reset to default seed data' });
+    res.json({ success: true, message: MESSAGES.RESET_DATA_SUCCESS });
   });
 
   // Projects list (Multi-Project Support for Construction Companies)
@@ -99,7 +100,7 @@ async function startServer() {
   app.post('/api/projects', (req, res) => {
     const { project_name, project_code, address, manager_user_id, description, status } = req.body;
     if (!project_name || !project_code) {
-      return res.status(400).json({ error: 'project_name and project_code are required' });
+      return res.status(400).json({ error: MESSAGES.PROJECT_FIELDS_REQUIRED });
     }
     const cleanCode = project_code.trim().toUpperCase();
     const cleanName = project_name.trim();
@@ -167,7 +168,7 @@ async function startServer() {
   app.post('/api/locations', (req, res) => {
     const { location_name, location_type, parent_location_id, project_id, description } = req.body;
     if (!location_name || !location_type) {
-      return res.status(400).json({ error: 'location_name and location_type are required' });
+      return res.status(400).json({ error: MESSAGES.LOCATION_FIELDS_REQUIRED });
     }
     const newLocation: Location = {
       location_id: `LOC-${Date.now().toString().slice(-6)}`,
@@ -275,7 +276,7 @@ async function startServer() {
     const { assetId } = req.params;
     const asset = findAsset(assetId);
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
     res.json(asset);
   });
@@ -294,14 +295,14 @@ async function startServer() {
     } = req.body;
 
     if (!asset_name || !category_id) {
-      return res.status(400).json({ error: 'asset_name and category_id are required' });
+      return res.status(400).json({ error: MESSAGES.ASSET_FIELDS_REQUIRED });
     }
 
     // Auto-generate or validate unique asset_id
     const finalAssetId = (asset_id || `ASSET-${Date.now().toString().slice(-4)}`).trim().toUpperCase();
     const existing = assets.find((a) => a.asset_id.toUpperCase() === finalAssetId);
     if (existing) {
-      return res.status(409).json({ error: `Asset ID "${finalAssetId}" already exists.` });
+      return res.status(409).json({ error: MESSAGES.ASSET_ID_EXISTS(finalAssetId) });
     }
 
     const qrCode = `SMART-ASSET:${finalAssetId}`;
@@ -332,7 +333,7 @@ async function startServer() {
       newAsset.asset_id,
       newAsset.asset_name,
       loc?.location_name || 'Warehouse',
-      `Tạo tài sản mới: ${newAsset.asset_name}`
+      MESSAGES.NEW_ASSET_AUDIT_NOTE(newAsset.asset_name)
     );
 
     res.status(201).json(newAsset);
@@ -343,7 +344,7 @@ async function startServer() {
     const { assetId } = req.params;
     const index = findAssetIndex(assetId);
     if (index === -1) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
 
     const { asset_name, category_id, serial_number, rfid_code, description, is_active } = req.body;
@@ -368,10 +369,10 @@ async function startServer() {
     const asset = findAsset(assetId);
 
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
     if (!Object.values(AssetStatus).includes(status)) {
-      return res.status(400).json({ error: 'Invalid asset status' });
+      return res.status(400).json({ error: MESSAGES.INVALID_ASSET_STATUS });
     }
 
     const prevStatus = asset.status;
@@ -389,7 +390,7 @@ async function startServer() {
       user_id: user_id || 'USER-005',
       location_id: asset.current_location_id || 'LOC-WAREHOUSE',
       timestamp: new Date().toISOString(),
-      note: note || `Đổi trạng thái từ ${prevStatus} sang ${status}`,
+      note: note || MESSAGES.STATUS_CHANGE_NOTE(prevStatus, status),
       previous_status: prevStatus,
       new_status: status,
     };
@@ -403,7 +404,7 @@ async function startServer() {
       asset.asset_id,
       asset.asset_name,
       loc?.location_name || 'Warehouse',
-      `Đổi trạng thái sang ${status}`
+      MESSAGES.STATUS_AUDIT_NOTE(status)
     );
 
     res.json(asset);
@@ -416,31 +417,31 @@ async function startServer() {
 
     const asset = findAsset(assetId);
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
 
     // BR-004: Cannot checkout if already in use, maintenance, lost, or inactive
     if (asset.status === AssetStatus.IN_USE) {
       const currentUser = getUser(asset.current_user_id);
       return res.status(400).json({
-        error: `Asset is currently in use by ${currentUser ? currentUser.name : 'another user'}.`,
+        error: MESSAGES.ASSET_IN_USE(currentUser ? currentUser.name : 'another user'),
       });
     }
     if (asset.status === AssetStatus.MAINTENANCE) {
-      return res.status(400).json({ error: 'Asset is currently under MAINTENANCE and cannot be checked out.' });
+      return res.status(400).json({ error: MESSAGES.ASSET_MAINTENANCE });
     }
     if (asset.status === AssetStatus.LOST) {
-      return res.status(400).json({ error: 'Asset is marked as LOST and cannot be checked out.' });
+      return res.status(400).json({ error: MESSAGES.ASSET_LOST });
     }
     if (asset.status === AssetStatus.DAMAGED) {
-      return res.status(400).json({ error: 'Asset is DAMAGED and cannot be checked out.' });
+      return res.status(400).json({ error: MESSAGES.ASSET_DAMAGED });
     }
     if (!asset.is_active || asset.status === AssetStatus.INACTIVE) {
-      return res.status(400).json({ error: 'Asset is INACTIVE.' });
+      return res.status(400).json({ error: MESSAGES.ASSET_INACTIVE });
     }
 
     if (!user_id) {
-      return res.status(400).json({ error: 'user_id is required for check-out' });
+      return res.status(400).json({ error: MESSAGES.CHECKOUT_USER_REQUIRED });
     }
 
     const previousStatus = asset.status;
@@ -464,7 +465,7 @@ async function startServer() {
       user_id,
       location_id: asset.current_location_id || 'LOC-WAREHOUSE',
       timestamp: now,
-      note: note || 'Check-out thiết bị sử dụng',
+      note: note || MESSAGES.CHECKOUT_NOTE,
       previous_status: previousStatus,
       new_status: AssetStatus.IN_USE,
     };
@@ -478,12 +479,12 @@ async function startServer() {
       asset.asset_id,
       asset.asset_name,
       loc?.location_name || 'Location',
-      note || `Check-out sử dụng thiết bị`
+      note || MESSAGES.CHECKOUT_NOTE
     );
 
     res.json({
       success: true,
-      message: 'Check-out successful',
+      message: MESSAGES.CHECKOUT_SUCCESS,
       asset,
       transaction: tx,
     });
@@ -496,7 +497,7 @@ async function startServer() {
 
     const asset = findAsset(assetId);
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
 
     const previousStatus = asset.status;
@@ -524,7 +525,7 @@ async function startServer() {
       user_id: returned_by_user_id || previousUser?.user_id || 'USER-001',
       location_id: returnLocId,
       timestamp: now,
-      note: note || 'Hoàn trả thiết bị về kho',
+      note: note || MESSAGES.CHECKIN_NOTE,
       previous_status: previousStatus,
       new_status: targetStatus,
     };
@@ -538,12 +539,12 @@ async function startServer() {
       asset.asset_id,
       asset.asset_name,
       loc?.location_name || 'Warehouse',
-      note || `Trả thiết bị về ${loc?.location_name || 'Kho'}`
+      note || MESSAGES.CHECKIN_AUDIT_NOTE(loc?.location_name || 'Kho')
     );
 
     res.json({
       success: true,
-      message: 'Check-in successful',
+      message: MESSAGES.CHECKIN_SUCCESS,
       asset,
       transaction: tx,
     });
@@ -556,10 +557,10 @@ async function startServer() {
 
     const asset = findAsset(assetId);
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
     if (!location_id) {
-      return res.status(400).json({ error: 'location_id is required' });
+      return res.status(400).json({ error: MESSAGES.LOCATION_REQUIRED });
     }
 
     const previousLocation = getLocation(asset.current_location_id);
@@ -579,7 +580,7 @@ async function startServer() {
       user_id: performerUserId,
       location_id: location_id,
       timestamp: now,
-      note: note || `Di chuyển từ ${previousLocation?.location_name || 'vị trí cũ'} tới ${newLocation?.location_name || 'vị trí mới'}`,
+      note: note || MESSAGES.MOVE_NOTE(previousLocation?.location_name || 'vị trí cũ', newLocation?.location_name || 'vị trí mới'),
       previous_status: asset.status,
       new_status: asset.status,
     };
@@ -592,12 +593,12 @@ async function startServer() {
       asset.asset_id,
       asset.asset_name,
       newLocation?.location_name || 'Location',
-      `Di chuyển tới ${newLocation?.location_name || location_id}`
+      MESSAGES.MOVE_AUDIT_NOTE(newLocation?.location_name || location_id)
     );
 
     res.json({
       success: true,
-      message: 'Asset moved successfully',
+      message: MESSAGES.ASSET_MOVED_SUCCESS,
       asset,
       transaction: tx,
     });
@@ -610,10 +611,10 @@ async function startServer() {
 
     const asset = findAsset(assetId);
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
     if (!to_project_id) {
-      return res.status(400).json({ error: 'to_project_id is required' });
+      return res.status(400).json({ error: MESSAGES.PROJECT_REQUIRED });
     }
 
     const fromProject = getProject(asset.project_id);
@@ -637,7 +638,7 @@ async function startServer() {
       from_project_id: prevProjId,
       to_project_id,
       timestamp: now,
-      note: note || `Điều chuyển công trường từ ${fromProject?.project_name || 'Kho'} sang ${toProject?.project_name || to_project_id}`,
+      note: note || MESSAGES.TRANSFER_NOTE(toProject?.project_name || to_project_id),
       previous_status: asset.status,
       new_status: asset.status,
     };
@@ -650,12 +651,12 @@ async function startServer() {
       asset.asset_id,
       asset.asset_name,
       toProject?.project_name || 'Dự án mới',
-      `Điều chuyển từ [${fromProject?.project_name || 'Kho'}] sang [${toProject?.project_name || to_project_id}]`
+      MESSAGES.TRANSFER_AUDIT_NOTE(fromProject?.project_name || 'Kho', toProject?.project_name || to_project_id)
     );
 
     res.json({
       success: true,
-      message: 'Asset transferred to new project successfully',
+      message: MESSAGES.ASSET_TRANSFER_SUCCESS,
       asset,
       transaction: tx,
     });
@@ -666,7 +667,7 @@ async function startServer() {
     const { assetId } = req.params;
     const asset = findAsset(assetId);
     if (!asset) {
-      return res.status(404).json({ error: 'Asset not found' });
+      return res.status(404).json({ error: MESSAGES.ASSET_NOT_FOUND() });
     }
 
     const history = transactions
@@ -764,7 +765,7 @@ async function startServer() {
   app.use(((error: unknown, _req, res, _next) => {
     console.error('Unhandled request failed.', error instanceof Error ? error.name : 'Unknown error');
     res.status(500).json({
-      error: { code: 'INTERNAL_ERROR', message: 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại.' },
+      error: { code: 'INTERNAL_ERROR', message: MESSAGES.SYSTEM_ERROR },
     });
   }) as express.ErrorRequestHandler);
 
