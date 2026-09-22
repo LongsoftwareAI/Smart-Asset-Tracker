@@ -3,6 +3,8 @@ name: smart-asset-tracker
 services:
   db:
     image: postgres:16-alpine
+    ports:
+      - "5432:5432"
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-assetmate}
